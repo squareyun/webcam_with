@@ -17,7 +17,7 @@ public class MainClient {
     	Webcam webcam = Webcam.getDefault();
     	webcam.open();
     	
-    	socket = new Socket("192.168.219.104", 123);
+    	socket = new Socket("127.0.0.1", 4000);
     	
     	BufferedImage bm = webcam.getImage();
     	
