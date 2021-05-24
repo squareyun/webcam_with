@@ -1,5 +1,6 @@
 package server;
 
+import java.awt.Image;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
@@ -22,13 +23,16 @@ public class MainServer {
 			
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 			
+			//frame과 label 사이즈를 1000, 1000으로 해둠
+			//client 코드에서 캠 크기 조절 테스트를 위해 임의로 바꿔둔 부분
+			//필요에 따라 조절하여 사용
 			JLabel label = new JLabel();
 			JFrame frame = new JFrame();
-			frame.setSize(700, 700);
+			frame.setSize(1000, 1000);
 			frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 			
 			label = new JLabel();
-			label.setSize(700, 700);
+			label.setSize(1000, 1000);
 			label.setVisible(true);
 			
 			frame.add(label);
