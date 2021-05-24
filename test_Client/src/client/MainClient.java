@@ -1,6 +1,5 @@
 package client;
 
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -44,6 +43,8 @@ public class MainClient {
 			dout.writeObject(im);
 			l.setIcon(im);
 			dout.flush();
+			//문제 해결을 위해 추가된 부분 (다음 한 줄)
+			dout.reset();
 		}
 	}
 }
