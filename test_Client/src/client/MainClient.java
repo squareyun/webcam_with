@@ -31,7 +31,7 @@ public class MainClient {
 		//아래 캠 크기 조절을 위해 임시로 frame 사이즈를 1000, 1000으로 늘려둠
 		//필요에 따라 수정하여 사용하면 됨
 		JFrame frame = new JFrame("PC 1");
-		frame.setSize(1000, 1000);
+		frame.setSize(1000, 700);
 		frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 		
 		JLabel l = new JLabel();
@@ -47,7 +47,7 @@ public class MainClient {
 			//img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 			//width와 height으로 원하는 캠 크기 조절, 마지막 인자는 비율에 맞게 화면 비율 변화시켜 주기 위함
 			Image img = im.getImage();
-			Image changeImg = img.getScaledInstance(1000, 1000, Image.SCALE_SMOOTH);
+			Image changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
 			ImageIcon changeIcon = new ImageIcon(changeImg);
 			dout.writeObject(changeIcon);
 			l.setIcon(changeIcon);
