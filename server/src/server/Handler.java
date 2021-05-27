@@ -1,9 +1,20 @@
 package server;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.WindowConstants;
+
+import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamResolution;
 
 // 한 명의 클라이언트와 통신하도록 하는 클래스
 public class Handler {
@@ -11,7 +22,8 @@ public class Handler {
 	
 	public Handler(Socket socket) {
 		this.socket = socket;
-		receive();		
+		receive();
+		sendVideo();
 	}
 	
 	// 클라이언트로부터 메세지를 받음
@@ -71,6 +83,38 @@ public class Handler {
 					} catch (Exception e2) {
 						e2.printStackTrace();
 					}
+				}
+			}
+		};
+		MainServer.threadPool.submit(thread);
+	}
+	
+	public void sendVideo() {
+		// 클라이언트에게 비디오 전송
+		Runnable thread = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					while(true) {
+						BufferedImage bm = MainServer.webcam.getImage();
+						ObjectOutputStream dout = new ObjectOutputStream(socket.getOutputStream());
+						
+						bm = MainServer.webcam.getImage();
+						ImageIcon im = new ImageIcon(bm);
+						//카메라 캠 크기의 임의 조절을 위한 부분
+						//img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+						//width와 height으로 원하는 캠 크기 조절, 마지막 인자는 비율에 맞게 화면 비율 변화시켜 주기 위함
+						Image img = im.getImage();
+						Image changeImg = img.getScaledInstance(1000, 1000, Image.SCALE_SMOOTH);
+						ImageIcon changeIcon = new ImageIcon(changeImg);
+						dout.writeObject(changeIcon);
+						MainServer.l.setIcon(changeIcon);
+						dout.flush();
+						//문제 해결을 위해 추가된 부분 (다음 한 줄)
+						dout.reset();
+					}
+				} catch (Exception e) {
+					 e.printStackTrace();
 				}
 			}
 		};
