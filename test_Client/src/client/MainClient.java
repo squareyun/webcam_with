@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
+import com.github.sarxos.webcam.WebcamPanel;
 
 public class MainClient {
 	static Socket socket;
@@ -20,6 +21,10 @@ public class MainClient {
 		webcam.setViewSize(WebcamResolution.VGA.getSize());
 		webcam.open(true);
 		
+        final WebcamPanel panel = new WebcamPanel(webcam);
+        panel.setSize(1000,1000);
+        panel.setMirrored(true);
+
 		socket = new Socket("127.0.0.1", 5000);
 		
 		BufferedImage bm = webcam.getImage();
@@ -28,11 +33,17 @@ public class MainClient {
 		
 		ImageIcon im = new ImageIcon(bm);
 		
-		//¾Æ·¡ Ä· Å©±â Á¶ÀıÀ» À§ÇØ ÀÓ½Ã·Î frame »çÀÌÁî¸¦ 1000, 1000À¸·Î ´Ã·ÁµÒ
-		//ÇÊ¿ä¿¡ µû¶ó ¼öÁ¤ÇÏ¿© »ç¿ëÇÏ¸é µÊ
+		
+		//ì•„ë˜ ìº  í¬ê¸° ì¡°ì ˆì„ ìœ„í•´ ì„ì‹œë¡œ frame ì‚¬ì´ì¦ˆë¥¼ 1000, 1000ìœ¼ë¡œ ëŠ˜ë ¤ë‘ 
+		//í•„ìš”ì— ë”°ë¼ ìˆ˜ì •í•˜ì—¬ ì‚¬ìš©í•˜ë©´ ë¨
+
+
 		JFrame frame = new JFrame("PC 1");
 		frame.setSize(1000, 1000);
+		frame.add(panel);
+		frame.setResizable(true);
 		frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
+		frame.pack();
 		
 		JLabel l = new JLabel();
 		l.setVisible(true);
@@ -43,16 +54,16 @@ public class MainClient {
 		while(true) {
 			bm = webcam.getImage();
 			im = new ImageIcon(bm);
-			//Ä«¸Ş¶ó Ä· Å©±âÀÇ ÀÓÀÇ Á¶ÀıÀ» À§ÇÑ ºÎºĞ
+			//ì¹´ë©”ë¼ ìº  í¬ê¸°ì˜ ì„ì˜ ì¡°ì ˆì„ ìœ„í•œ ë¶€ë¶„
 			//img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-			//width¿Í heightÀ¸·Î ¿øÇÏ´Â Ä· Å©±â Á¶Àı, ¸¶Áö¸· ÀÎÀÚ´Â ºñÀ²¿¡ ¸Â°Ô È­¸é ºñÀ² º¯È­½ÃÄÑ ÁÖ±â À§ÇÔ
+			//widthì™€ heightìœ¼ë¡œ ì›í•˜ëŠ” ìº  í¬ê¸° ì¡°ì ˆ, ë§ˆì§€ë§‰ ì¸ìëŠ” ë¹„ìœ¨ì— ë§ê²Œ í™”ë©´ ë¹„ìœ¨ ë³€í™”ì‹œì¼œ ì£¼ê¸° ìœ„í•¨
 			Image img = im.getImage();
 			Image changeImg = img.getScaledInstance(1000, 1000, Image.SCALE_SMOOTH);
 			ImageIcon changeIcon = new ImageIcon(changeImg);
 			dout.writeObject(changeIcon);
 			l.setIcon(changeIcon);
 			dout.flush();
-			//¹®Á¦ ÇØ°áÀ» À§ÇØ Ãß°¡µÈ ºÎºĞ (´ÙÀ½ ÇÑ ÁÙ)
+			//ë¬¸ì œ í•´ê²°ì„ ìœ„í•´ ì¶”ê°€ëœ ë¶€ë¶„ (ë‹¤ìŒ í•œ ì¤„)
 			dout.reset();
 		}
 	}
