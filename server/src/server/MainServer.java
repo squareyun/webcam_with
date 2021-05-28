@@ -24,13 +24,14 @@ public class MainServer {
 	public static Vector<Handler> users = new Vector<Handler>();
 	public static Webcam webcam;
 	public static JLabel l;
+	public static JFrame frame;
 	
 	ServerSocket serverSocket;
 
 	public void startServer(String IP, int port) {
 		try {
-			serverSocket = new ServerSocket();
-			serverSocket.bind(new InetSocketAddress(IP, port));
+			serverSocket = new ServerSocket(port);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!serverSocket.isClosed())
@@ -41,7 +42,9 @@ public class MainServer {
 		webcam = Webcam.getDefault();
 		webcam.setViewSize(WebcamResolution.VGA.getSize());
 		webcam.open(true);
-		JFrame frame = new JFrame("Server");
+		Webcam.getDiscoveryService().setEnabled(false);
+		Webcam.getDiscoveryService().stop();
+		frame = new JFrame("Server");
 		frame.setSize(1000, 1000);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		l = new JLabel();
@@ -63,6 +66,8 @@ public class MainServer {
 					} catch (Exception e) {
 						if (!serverSocket.isClosed())
 							stopServer();
+						else
+							frame.dispose();
 						break;
 					}
 				}
@@ -74,6 +79,7 @@ public class MainServer {
 
 	public void stopServer() {
 		try {
+			frame.dispose();
 			Iterator<Handler> it = users.iterator();
 			while (it.hasNext()) {
 				Handler client = it.next();

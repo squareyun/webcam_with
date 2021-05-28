@@ -19,10 +19,16 @@ import com.github.sarxos.webcam.WebcamResolution;
 // 한 명의 클라이언트와 통신하도록 하는 클래스
 public class Handler {
 	Socket socket;
-	
+	BufferedImage bm;
+	ObjectOutputStream dout;
+	ImageIcon im;
+	Image img;
+	Image changeImg;
+	ImageIcon changeIcon;
+
 	public Handler(Socket socket) {
 		this.socket = socket;
-		receive();
+		//receive();
 		sendVideo();
 	}
 	
@@ -96,17 +102,16 @@ public class Handler {
 			public void run() {
 				try {
 					while(true) {
-						BufferedImage bm = MainServer.webcam.getImage();
-						ObjectOutputStream dout = new ObjectOutputStream(socket.getOutputStream());
-						
+						System.out.println("화면전송");
 						bm = MainServer.webcam.getImage();
-						ImageIcon im = new ImageIcon(bm);
+						dout = new ObjectOutputStream(socket.getOutputStream());
+						im = new ImageIcon(bm);
 						//카메라 캠 크기의 임의 조절을 위한 부분
 						//img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 						//width와 height으로 원하는 캠 크기 조절, 마지막 인자는 비율에 맞게 화면 비율 변화시켜 주기 위함
-						Image img = im.getImage();
-						Image changeImg = img.getScaledInstance(1000, 1000, Image.SCALE_SMOOTH);
-						ImageIcon changeIcon = new ImageIcon(changeImg);
+						img = im.getImage();
+						changeImg = img.getScaledInstance(1000, 1000, Image.SCALE_SMOOTH);
+						changeIcon = new ImageIcon(changeImg);
 						dout.writeObject(changeIcon);
 						MainServer.l.setIcon(changeIcon);
 						dout.flush();
