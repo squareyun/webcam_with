@@ -19,8 +19,10 @@ public class MainClient {
 		Webcam webcam = Webcam.getDefault();
 		webcam.setViewSize(WebcamResolution.VGA.getSize());
 		webcam.open(true);
+		Webcam.getDiscoveryService().setEnabled(false);
+		Webcam.getDiscoveryService().stop();
 		
-		socket = new Socket("127.0.0.1", 5000);
+		socket = new Socket("192.168.219.101", 5000);
 		
 		BufferedImage bm = webcam.getImage();
 		

@@ -9,5 +9,7 @@
 	<classpathentry kind="lib" path="src/lib/bridj-0.7.0.jar"/>
 	<classpathentry kind="lib" path="src/lib/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="src/lib/webcam-capture-0.3.12.jar"/>
+	<classpathentry kind="lib" path="src/lib/logback-classic-1.2.3.jar"/>
+	<classpathentry kind="lib" path="src/lib/logback-core-1.2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
