@@ -14,10 +14,12 @@ import javax.swing.WindowConstants;
 public class MainClient {
 	Socket socket;
 	public static JLabel label;
+	public static JFrame frame;
+	public static ObjectInputStream in;
 	
 	public void startClient(String IP, int port) {
 		label = new JLabel();
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.setSize(1000, 1000);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
@@ -32,7 +34,8 @@ public class MainClient {
 			public void run() {
 				try {
 					socket = new Socket(IP, port);
-					receive();
+					System.out.println("[서버 접속 성공]");
+					//receive();
 					receiveVideo();
 				} catch (Exception e) {
 					stopClient();
@@ -43,11 +46,28 @@ public class MainClient {
 		thread.start();
 	}
 	
-	protected void receiveVideo() throws IOException {
+	protected synchronized void receiveVideo() {
 		while(true) {
 			try {
-				ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-				label.setIcon((ImageIcon)in.readObject());
+				try {
+					in = new ObjectInputStream(socket.getInputStream());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("받기 성공");
+				try {
+					label.setIcon((ImageIcon)in.readObject());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					in.reset();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -57,7 +77,9 @@ public class MainClient {
 	public void stopClient() {
 		try {
 			if(socket != null && !socket.isClosed()) {
+				frame.dispose();
 				socket.close();
+				
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -97,6 +119,6 @@ public class MainClient {
 	
 	public static void main(String[] args) {
 		MainClient c = new MainClient();
-		c.startClient("192.168.219.101", 55555);
+		c.startClient("192.168.219.103", 55555);
 	}
 }
