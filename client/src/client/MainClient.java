@@ -20,11 +20,11 @@ public class MainClient {
 	public void startClient(String IP, int port) {
 		label = new JLabel();
 		frame = new JFrame();
-		frame.setSize(1000, 1000);
+		frame.setSize(700, 700);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
 		label = new JLabel();
-		label.setSize(1000, 1000);
+		label.setSize(640, 480);
 		label.setVisible(true);
 		
 		frame.add(label);
@@ -46,29 +46,24 @@ public class MainClient {
 		thread.start();
 	}
 	
-	protected synchronized void receiveVideo() {
+	public void receiveVideo() {
+		try {
+			in = new ObjectInputStream(socket.getInputStream());
+		} catch (IOException e1) {
+			System.out.println("1번에러");
+			e1.printStackTrace();
+		}
 		while(true) {
 			try {
 				try {
-					in = new ObjectInputStream(socket.getInputStream());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("받기 성공");
-				try {
 					label.setIcon((ImageIcon)in.readObject());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					System.out.println("2번에러");
 					e.printStackTrace();
 				}
-				try {
-					in.reset();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 			} catch (ClassNotFoundException e) {
+				System.out.println("4번에러");
 				e.printStackTrace();
 			}
 		}
@@ -119,6 +114,6 @@ public class MainClient {
 	
 	public static void main(String[] args) {
 		MainClient c = new MainClient();
-		c.startClient("192.168.219.103", 55555);
+		c.startClient("localhost", 55555);
 	}
 }

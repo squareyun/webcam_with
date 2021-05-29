@@ -45,7 +45,7 @@ public class MainServer {
 		Webcam.getDiscoveryService().setEnabled(false);
 		Webcam.getDiscoveryService().stop();
 		frame = new JFrame("Server");
-		frame.setSize(1000, 1000);
+		frame.setSize(700, 700);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		l = new JLabel();
 		l.setVisible(true);
@@ -66,8 +66,7 @@ public class MainServer {
 					} catch (Exception e) {
 						if (!serverSocket.isClosed())
 							stopServer();
-						else
-							frame.dispose();
+						frame.dispose();
 						break;
 					}
 				}
@@ -96,7 +95,7 @@ public class MainServer {
 
 	public static void main(String[] args) {
 		MainServer m = new MainServer();
-		m.startServer("192.168.219.101", 55555);
+		m.startServer("localhost", 55555);
 	}
 
 }
