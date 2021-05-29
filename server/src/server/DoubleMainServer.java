@@ -20,9 +20,9 @@ import javax.swing.WindowConstants;
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
 
-public class MainServer {
+public class DoubleMainServer {
 	public static ExecutorService threadPool;
-	public static Vector<Handler> users = new Vector<Handler>();
+	public static Vector<DoubleHandler> users = new Vector<DoubleHandler>();
 	public static Webcam webcam;
 	public static JLabel l;
 	public static JFrame frame;
@@ -33,10 +33,12 @@ public class MainServer {
 	public static ImageIcon changeIcon;
 	
 	ServerSocket serverSocket;
+	ServerSocket msgServerSocket;
 
-	public void startServer(String IP, int port) {
+	public void startServer(String IP, int port, int msgPort) {
 		try {
 			serverSocket = new ServerSocket(port);
+			msgServerSocket = new ServerSocket(msgPort);
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!serverSocket.isClosed())
@@ -65,7 +67,8 @@ public class MainServer {
 				while (true) {
 					try {
 						Socket socket = serverSocket.accept();
-						users.add(new Handler(socket));
+						Socket msgSocket = msgServerSocket.accept();
+						users.add(new DoubleHandler(socket, msgSocket));
 						System.out.println("[클라이언트 접속] " + socket.getRemoteSocketAddress() + ": "
 								+ Thread.currentThread().getName());
 					} catch (Exception e) {
@@ -85,12 +88,12 @@ public class MainServer {
 			@Override
 			public void run() {
 				while (true) {
-					bm = MainServer.webcam.getImage();
+					bm = DoubleMainServer.webcam.getImage();
 					im = new ImageIcon(bm);
 					img = im.getImage();
 					changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
 					changeIcon = new ImageIcon(changeImg);
-					MainServer.l.setIcon(changeIcon);
+					DoubleMainServer.l.setIcon(changeIcon);
 				}
 			}
 		};
@@ -100,10 +103,11 @@ public class MainServer {
 	public void stopServer() {
 		try {
 			frame.dispose();
-			Iterator<Handler> it = users.iterator();
+			Iterator<DoubleHandler> it = users.iterator();
 			while (it.hasNext()) {
-				Handler client = it.next();
+				DoubleHandler client = it.next();
 				client.socket.close();
+				client.msgSocket.close();
 				it.remove();
 			}
 
@@ -115,8 +119,8 @@ public class MainServer {
 	}
 
 	public static void main(String[] args) {
-		MainServer m = new MainServer();
-		m.startServer("localhost", 55555);
+		DoubleMainServer m = new DoubleMainServer();
+		m.startServer("localhost", 55555, 44444);
 	}
 
 }
