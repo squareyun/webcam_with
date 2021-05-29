@@ -28,11 +28,11 @@ public class MainServer {
 			//필요에 따라 조절하여 사용
 			JLabel label = new JLabel();
 			JFrame frame = new JFrame();
-			frame.setSize(1000, 1000);
+			frame.setSize(500, 500);
 			frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 			
 			label = new JLabel();
-			label.setSize(1000, 1000);
+			label.setSize(500, 500);
 			label.setVisible(true);
 			
 			frame.add(label);
