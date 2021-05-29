@@ -1,5 +1,6 @@
 package server;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -52,7 +53,7 @@ public class MainServer {
 		
 		frame.add(l);
 		frame.setVisible(true);
-
+		
 		// 클라리언트 접속 대기
 		Runnable thread = new Runnable() {
 			@Override
@@ -74,6 +75,15 @@ public class MainServer {
 		};
 		threadPool = Executors.newCachedThreadPool();
 		threadPool.submit(thread);
+		
+		while(users.isEmpty()) {
+			BufferedImage bm = MainServer.webcam.getImage();
+			ImageIcon im = new ImageIcon(bm);
+			Image img = im.getImage();
+			Image changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
+			ImageIcon changeIcon = new ImageIcon(changeImg);
+			l.setIcon(changeIcon);
+		}
 	}
 
 	public void stopServer() {

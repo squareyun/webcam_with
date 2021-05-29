@@ -24,12 +24,11 @@ public class Handler {
 	Image img;
 	Image changeImg;
 	ImageIcon changeIcon;
-	public static ObjectOutputStream dout;
+	public ObjectOutputStream dout;
 	
 	public Handler(Socket socket) {
 		this.socket = socket;
 		//receive();
-
 		sendVideo();
 	}
 	
@@ -117,11 +116,8 @@ public class Handler {
 						img = im.getImage();
 						changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
 						changeIcon = new ImageIcon(changeImg);
-						dout.writeObject(changeIcon);
+						broadcast(changeIcon);
 						MainServer.l.setIcon(changeIcon);
-						dout.flush();
-						//문제 해결을 위해 추가된 부분 (다음 한 줄)
-						dout.reset();
 					}
 				} catch (Exception e) {
 					 e.printStackTrace();
@@ -129,6 +125,21 @@ public class Handler {
 			}
 		};
 		MainServer.threadPool.submit(thread);
+	}
+	
+	public void broadcast(ImageIcon changeIcon) {
+		synchronized (MainServer.users) {
+			for (Handler user : MainServer.users) {
+				try {
+					user.dout.writeObject(changeIcon);
+					user.dout.flush();
+					user.dout.reset();
+				} catch (Exception e) {
+					 e.printStackTrace();
+					 System.out.println("error this");
+				}
+			}
+		}
 	}
 	
 }
