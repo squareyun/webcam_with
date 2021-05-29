@@ -52,19 +52,14 @@ public class MainClient {
 		} catch (IOException e1) {
 			System.out.println("1번에러");
 			e1.printStackTrace();
+			stopClient();
 		}
 		while(true) {
 			try {
-				try {
-					label.setIcon((ImageIcon)in.readObject());
-				} catch (IOException e) {
-					System.out.println("2번에러");
-					e.printStackTrace();
-				}
-
-			} catch (ClassNotFoundException e) {
-				System.out.println("4번에러");
+				label.setIcon((ImageIcon)in.readObject());
+			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
+				stopClient();
 			}
 		}
 	}

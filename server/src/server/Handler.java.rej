@@ -1,0 +1,14 @@
+diff a/server/src/server/Handler.java b/server/src/server/Handler.java	(rejected hunks)
+@@ -90,12 +90,6 @@
+ 	}
+ 	
+ 	public void sendVideo() {
+-		try {
+-			dout = new ObjectOutputStream(socket.getOutputStream());
+-		} catch (IOException e) {
+-			System.out.println("0�� ����");
+-			e.printStackTrace();
+-		}
+ 		// Ŭ���̾�Ʈ���� ���� ����
+ 		Runnable thread = new Runnable() {
+ 			@Override

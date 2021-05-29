@@ -26,6 +26,11 @@ public class MainServer {
 	public static Webcam webcam;
 	public static JLabel l;
 	public static JFrame frame;
+	public static BufferedImage bm;
+	public static ImageIcon im;
+	public static Image img;
+	public static Image changeImg;
+	public static ImageIcon changeIcon;
 	
 	ServerSocket serverSocket;
 
@@ -76,14 +81,21 @@ public class MainServer {
 		threadPool = Executors.newCachedThreadPool();
 		threadPool.submit(thread);
 		
-		while(users.isEmpty()) {
-			BufferedImage bm = MainServer.webcam.getImage();
-			ImageIcon im = new ImageIcon(bm);
-			Image img = im.getImage();
-			Image changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
-			ImageIcon changeIcon = new ImageIcon(changeImg);
-			l.setIcon(changeIcon);
-		}
+		// 웹캠으로부터 영상 이미지를 캡쳐해서 설정하는 스레드
+		Runnable thread2 = new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					bm = MainServer.webcam.getImage();
+					im = new ImageIcon(bm);
+					img = im.getImage();
+					changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
+					changeIcon = new ImageIcon(changeImg);
+					MainServer.l.setIcon(changeIcon);
+				}
+			}
+		};
+		threadPool.submit(thread2);
 	}
 
 	public void stopServer() {
