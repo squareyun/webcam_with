@@ -1,59 +1,162 @@
 package client;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import com.github.sarxos.webcam.Webcam;
-import com.github.sarxos.webcam.WebcamResolution;
+import javax.swing.WindowConstants;
+import java.awt.*;
+
+import javax.swing.JButton;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainClient {
-	static Socket socket;
+	Socket socket;
+	public static JLabel label;
+	public static JFrame frame;
+	public static ObjectInputStream in;
 
-	public static void main(String[] args) throws IOException{
+	TextField txt1 = new TextField("ì±„íŒ…");
+	TextField txt2 = new TextField("");
+	TextField txt3 = new TextField("");
+	TextArea lbl = new TextArea("ì±„íŒ…ë‚´ì—­");
+
+	public void startClient(String IP, int port) {
 		
-		Webcam webcam = Webcam.getDefault();
-		webcam.setViewSize(WebcamResolution.VGA.getSize());
-		webcam.open(true);
-		
-		socket = new Socket("127.0.0.1", 5000);
-		
-		BufferedImage bm = webcam.getImage();
-		
-		ObjectOutputStream dout = new ObjectOutputStream(socket.getOutputStream());
-		
-		ImageIcon im = new ImageIcon(bm);
-		
-		//¾Æ·¡ Ä· Å©±â Á¶ÀıÀ» À§ÇØ ÀÓ½Ã·Î frame »çÀÌÁî¸¦ 1000, 1000À¸·Î ´Ã·ÁµÒ
-		//ÇÊ¿ä¿¡ µû¶ó ¼öÁ¤ÇÏ¿© »ç¿ëÇÏ¸é µÊ
-		JFrame frame = new JFrame("PC 1");
-		frame.setSize(1000, 1000);
-		frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
-		
-		JLabel l = new JLabel();
-		l.setVisible(true);
-		
-		frame.add(l);
+		label = new JLabel();
+		frame = new JFrame();
+		frame.setTitle("Client");
+		frame.setSize(700, 700);
+		JButton btn4 = new JButton("ì „ì†¡");
+		JButton btn1 = new JButton("ë‚˜ê°€ê¸°");
+		JButton btn2 = new JButton("ë¬¸ì œë³€ê²½");
+		JButton btn3 = new JButton("??");
+		frame.setLayout(null);
+		lbl.setBounds(10,500,620,200); //ì±„íŒ…ë‚´ì—­
+		txt1.setBounds(10,710,520,40); //ì±„íŒ…ì¹˜ëŠ”ê³³
+		txt2.setBounds(670,70,200,410); //ì ìˆ˜íŒ
+		txt3.setBounds(720,20,100,40);
+		btn4.setBounds(530,710,100,40);
+		btn1.setBounds(720,700,100,40);
+		btn2.setBounds(720,630,100,40);
+		btn3.setBounds(720,560,100,40);
+		//í”„ë ˆì„ì— ì»´í¬ë„ŒíŠ¸ ì¶”ê°€
+		frame.add(lbl);
+		frame.add(txt1);
+		frame.add(txt2);
+		frame.add(txt3);
+		frame.add(btn4);
+		frame.add(btn1);
+		frame.add(btn2);
+		frame.add(btn3);
+		//í”„ë ˆì„ ë³´ì´ê¸°
 		frame.setVisible(true);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		btn1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				System.exit(0);
+			}
+		});
+		frame.pack();	
+		label = new JLabel();
+		label.setSize(640, 480);
+		label.setVisible(true);
 		
-		while(true) {
-			bm = webcam.getImage();
-			im = new ImageIcon(bm);
-			//Ä«¸Ş¶ó Ä· Å©±âÀÇ ÀÓÀÇ Á¶ÀıÀ» À§ÇÑ ºÎºĞ
-			//img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-			//width¿Í heightÀ¸·Î ¿øÇÏ´Â Ä· Å©±â Á¶Àı, ¸¶Áö¸· ÀÎÀÚ´Â ºñÀ²¿¡ ¸Â°Ô È­¸é ºñÀ² º¯È­½ÃÄÑ ÁÖ±â À§ÇÔ
-			Image img = im.getImage();
-			Image changeImg = img.getScaledInstance(1000, 1000, Image.SCALE_SMOOTH);
-			ImageIcon changeIcon = new ImageIcon(changeImg);
-			dout.writeObject(changeIcon);
-			l.setIcon(changeIcon);
-			dout.flush();
-			//¹®Á¦ ÇØ°áÀ» À§ÇØ Ãß°¡µÈ ºÎºĞ (´ÙÀ½ ÇÑ ÁÙ)
-			dout.reset();
+		frame.add(label);
+		frame.setVisible(true);
+
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					socket = new Socket(IP, port);
+					System.out.println("[ì„œë²„ ì ‘ì† ì„±ê³µ]");
+					//receive();
+					receiveVideo();
+				} catch (Exception e) {
+					stopClient();
+					System.out.println("[ì„œë²„ ì ‘ì† ì‹¤íŒ¨]");
+				}
+			}
+		};
+		thread.start();
+	}
+	
+	public void receiveVideo() {
+		try {
+			in = new ObjectInputStream(socket.getInputStream());
+		} catch (IOException e1) {
+			System.out.println("1ë²ˆì—ëŸ¬");
+			e1.printStackTrace();
 		}
+		while(true) {
+			try {
+				try {
+					label.setIcon((ImageIcon)in.readObject());
+				} catch (IOException e) {
+					System.out.println("2ë²ˆì—ëŸ¬");
+					e.printStackTrace();
+				}
+
+			} catch (ClassNotFoundException e) {
+				System.out.println("4ë²ˆì—ëŸ¬");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void stopClient() {
+		try {
+			if(socket != null && !socket.isClosed()) {
+				frame.dispose();
+				socket.close();
+				
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receive() {
+		while(true) {
+			try {
+				InputStream in = socket.getInputStream();
+				byte[] buffer = new byte[512];
+				int length = in.read(buffer);
+				if(length == -1) throw new IOException();
+				String message = new String(buffer, 0, length, "UTF-8");
+			} catch (Exception e) {
+				stopClient();
+				break;
+			}
+		}
+	}
+	
+	public void send(String message) {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					OutputStream out = socket.getOutputStream();
+					byte[] buffer = message.getBytes("UTF-8");
+					out.write(buffer);
+					out.flush();
+				} catch (Exception e) {
+					stopClient();
+				}
+			}
+		};
+		thread.start();
+	}
+	
+	public static void main(String[] args) {
+		MainClient c = new MainClient();
+		c.startClient("localhost", 55555);
+	
 	}
 }
