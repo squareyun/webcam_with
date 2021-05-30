@@ -73,7 +73,6 @@ public class Handler {
 								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						MainServer.users.remove(Handler.this);
-						msgSocket.close();
 					} catch (Exception e2) {
 						e2.printStackTrace();
 					}

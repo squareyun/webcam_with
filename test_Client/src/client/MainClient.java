@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -157,10 +158,12 @@ public class MainClient {
 						String message = new String(buffer, 0, length, "UTF-8");
 						System.out.println("receive() on client 6");
 					} catch (Exception e) {
+						e.printStackTrace();
 						stopClient();
 						break;
 					}
 				}
+				System.out.println("Out of receive() while loop");
 			}
 		};
 		thread.start();
@@ -186,6 +189,9 @@ public class MainClient {
 	public static void main(String[] args) {
 		MainClient c = new MainClient();
 		c.startClient("localhost", 55555, 44444);
-		c.receive();
+		Scanner scan = new Scanner(System.in);
+		if(scan.nextInt() == 1)
+			c.receive();
+		scan.close();
 	}
 }
