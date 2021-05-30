@@ -30,7 +30,7 @@ public class MainServer {
 	public static ExecutorService threadPool;
 	public static Vector<Handler> users = new Vector<Handler>();
 	public static Webcam webcam;
-	public static JLabel l;
+	public static JLabel webcamLabel;
 	public static JFrame frame;
 	public static BufferedImage bm;
 	public static ImageIcon im;
@@ -38,10 +38,11 @@ public class MainServer {
 	public static Image changeImg;
 	public static ImageIcon changeIcon;
 	
-	TextField txt1 = new TextField("채팅");
-	TextField txt2 = new TextField("");
-	TextArea lbl = new TextArea("채팅내역");
-	TextField txt3 = new TextField("");
+	
+	TextField chatField;
+	TextField rankField;
+	TextField txt3;
+	static TextArea chatLogArea;
 	
 	ServerSocket serverSocket;
 
@@ -95,7 +96,7 @@ public class MainServer {
 					img = im.getImage();
 					changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
 					changeIcon = new ImageIcon(changeImg);
-					MainServer.l.setIcon(changeIcon);
+					MainServer.webcamLabel.setIcon(changeIcon);
 				}
 			}
 		};
@@ -120,47 +121,56 @@ public class MainServer {
 	}
 
 	public void setGui() {
-		frame = new JFrame("Server");
-		JButton btn4 = new JButton("전송");
-		JButton btn1 = new JButton("나가기");
-		JButton btn2 = new JButton("문제변경");
+		frame = new JFrame();
+		chatField = new TextField("채팅");
+		rankField = new TextField("랭킹");
+		txt3 = new TextField("");
+		chatLogArea = new TextArea("채팅 내역");
+		webcamLabel = new JLabel();
+		frame.setTitle("Server");
+		JButton exitBtn = new JButton("나가기");
+		JButton btn2 = new JButton("문제 변경");
 		JButton btn3 = new JButton("??");
+		JButton sendBtn = new JButton("전송");
+		
+		rankField.setEditable(false);
+		chatLogArea.setEditable(false);
+		
 		frame.setLayout(null);
-		lbl.setBounds(10,500,620,200); //채팅내역
-		txt1.setBounds(10,710,520,40); //채팅치는곳
-		txt2.setBounds(670,70,200,410); //점수판
+		chatLogArea.setBounds(10,500,620,200); //채팅내역
+		chatField .setBounds(10,710,520,40); //채팅치는곳
+		rankField.setBounds(670,70,200,410); //점수판
 		txt3.setBounds(720,20,100,40);
-		btn4.setBounds(530,710,100,40);
-		btn1.setBounds(720,700,100,40);
+		exitBtn.setBounds(720,700,100,40);
+		sendBtn.setBounds(530,710,100,40);
 		btn2.setBounds(720,630,100,40);
 		btn3.setBounds(720,560,100,40);
+		webcamLabel.setSize(640,480);
+		
 		//프레임에 컴포넌트 추가
-		frame.add(lbl);
-		frame.add(txt1);
-		frame.add(txt2);
+		frame.add(webcamLabel);
+		frame.add(chatField);
+		frame.add(rankField);
 		frame.add(txt3);
-		frame.add(btn4);
-		frame.add(btn1);
+		frame.add(chatLogArea);
+		frame.add(exitBtn);
 		frame.add(btn2);
 		frame.add(btn3);
+		frame.add(sendBtn);
 		
-		Dimension d = new Dimension(900, 800);
-		frame.setPreferredSize(d);
-
+		//프레임 보이기
+		frame.setPreferredSize(new Dimension(900, 800));
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		btn1.addActionListener(new ActionListener() {
+		
+		exitBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
 				System.exit(0);
 			}
 		});
-		frame.pack();
-		l = new JLabel();
-		l.setSize(640,480);
-		l.setVisible(true);
 		
-		frame.add(l);
+		frame.pack();
 		frame.setVisible(true);
 	}
 	
