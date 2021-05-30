@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 
 public class MainClient {
 	Socket socket;
+	Socket msgSocket;
 	public static JLabel label;
 	public static JFrame frame;
 	public static ObjectInputStream in;
@@ -25,17 +26,16 @@ public class MainClient {
 	TextField txt1 = new TextField("채팅");
 	TextField txt2 = new TextField("");
 	TextField txt3 = new TextField("");
-	TextArea lbl = new TextArea("채팅내역");
+	TextArea lbl = new TextArea("채팅 내역");
 
-	public void startClient(String IP, int port) {
+	public void startClient(String IP, int port, int msgPort) {
 		
 		label = new JLabel();
 		frame = new JFrame();
 		frame.setTitle("Client");
-		frame.setSize(700, 700);
 		JButton btn4 = new JButton("전송");
 		JButton btn1 = new JButton("나가기");
-		JButton btn2 = new JButton("문제변경");
+		JButton btn2 = new JButton("문제 변경");
 		JButton btn3 = new JButton("??");
 		frame.setLayout(null);
 		lbl.setBounds(10,500,620,200); //채팅내역
@@ -56,14 +56,28 @@ public class MainClient {
 		frame.add(btn2);
 		frame.add(btn3);
 		//프레임 보이기
+		
+		Dimension d = new Dimension(900, 800);
+		frame.setPreferredSize(d);
+		
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		
 		btn1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
 				System.exit(0);
 			}
 		});
+		
+		btn4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				String message = txt1.getText();
+				send(message);
+			}
+		});
+		
 		frame.pack();	
 		label = new JLabel();
 		label.setSize(640, 480);
@@ -73,11 +87,12 @@ public class MainClient {
 		frame.setVisible(true);
 
 		Thread thread = new Thread() {
+			@Override
 			public void run() {
 				try {
 					socket = new Socket(IP, port);
+					msgSocket = new Socket(IP, msgPort);
 					System.out.println("[서버 접속 성공]");
-					//receive();
 					receiveVideo();
 				} catch (Exception e) {
 					stopClient();
@@ -92,20 +107,21 @@ public class MainClient {
 		try {
 			in = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e1) {
-			System.out.println("1번에러");
+			System.out.println("1번 에러");
 			e1.printStackTrace();
+			stopClient();
 		}
 		while(true) {
 			try {
 				try {
 					label.setIcon((ImageIcon)in.readObject());
 				} catch (IOException e) {
-					System.out.println("2번에러");
+					System.out.println("2번 에러");
 					e.printStackTrace();
 				}
 
 			} catch (ClassNotFoundException e) {
-				System.out.println("4번에러");
+				System.out.println("4번 에러");
 				e.printStackTrace();
 			}
 		}
@@ -116,7 +132,7 @@ public class MainClient {
 			if(socket != null && !socket.isClosed()) {
 				frame.dispose();
 				socket.close();
-				
+				msgSocket.close();
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -124,25 +140,38 @@ public class MainClient {
 	}
 	
 	public void receive() {
-		while(true) {
-			try {
-				InputStream in = socket.getInputStream();
-				byte[] buffer = new byte[512];
-				int length = in.read(buffer);
-				if(length == -1) throw new IOException();
-				String message = new String(buffer, 0, length, "UTF-8");
-			} catch (Exception e) {
-				stopClient();
-				break;
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				while(true) {
+					try {
+						System.out.println("receive() on client 1");
+						InputStream msgIn = msgSocket.getInputStream();
+						System.out.println("receive() on client 2");
+						byte[] buffer = new byte[512];
+						System.out.println("receive() on client 3");
+						int length = msgIn.read(buffer);
+						System.out.println("receive() on client 4");
+						if(length == -1) throw new IOException();
+						System.out.println("receive() on client 5");
+						String message = new String(buffer, 0, length, "UTF-8");
+						System.out.println("receive() on client 6");
+					} catch (Exception e) {
+						stopClient();
+						break;
+					}
+				}
 			}
-		}
+		};
+		thread.start();
 	}
 	
 	public void send(String message) {
 		Thread thread = new Thread() {
+			@Override
 			public void run() {
 				try {
-					OutputStream out = socket.getOutputStream();
+					OutputStream out = msgSocket.getOutputStream();
 					byte[] buffer = message.getBytes("UTF-8");
 					out.write(buffer);
 					out.flush();
@@ -156,7 +185,7 @@ public class MainClient {
 	
 	public static void main(String[] args) {
 		MainClient c = new MainClient();
-		c.startClient("localhost", 55555);
-	
+		c.startClient("localhost", 55555, 44444);
+		c.receive();
 	}
 }

@@ -1,9 +1,5 @@
 package server;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
@@ -11,16 +7,18 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 import java.awt.*;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamResolution;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 public class MainServer {
 	public static ExecutorService threadPool;
@@ -28,6 +26,11 @@ public class MainServer {
 	public static Webcam webcam;
 	public static JLabel l;
 	public static JFrame frame;
+	public static BufferedImage bm;
+	public static ImageIcon im;
+	public static Image img;
+	public static Image changeImg;
+	public static ImageIcon changeIcon;
 	
 	TextField txt1 = new TextField("채팅");
 	TextField txt2 = new TextField("");
@@ -35,11 +38,12 @@ public class MainServer {
 	TextField txt3 = new TextField("");
 	
 	ServerSocket serverSocket;
+	ServerSocket msgServerSocket;
 
-	public void startServer(String IP, int port) {
+	public void startServer(String IP, int port, int msgPort) {
 		try {
 			serverSocket = new ServerSocket(port);
-			
+			msgServerSocket = new ServerSocket(msgPort);
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!serverSocket.isClosed())
@@ -75,7 +79,10 @@ public class MainServer {
 		frame.add(btn1);
 		frame.add(btn2);
 		frame.add(btn3);
-		frame.setSize(700, 700);
+		
+		Dimension d = new Dimension(900, 800);
+		frame.setPreferredSize(d);
+
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		btn1.addActionListener(new ActionListener() {
@@ -92,18 +99,19 @@ public class MainServer {
 		frame.add(l);
 		frame.setVisible(true);
 
-		// 클라리언트 접속 대기
+		//클라이언트 접속 대기
 		Runnable thread = new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
 					try {
 						Socket socket = serverSocket.accept();
-						users.add(new Handler(socket));
+						Socket msgSocket = msgServerSocket.accept();
+						users.add(new Handler(socket, msgSocket));
 						System.out.println("[클라이언트 접속] " + socket.getRemoteSocketAddress() + ": "
 								+ Thread.currentThread().getName());
 					} catch (Exception e) {
-						if (!serverSocket.isClosed())
+						if (!serverSocket.isClosed() || !msgServerSocket.isClosed())
 							stopServer();
 						frame.dispose();
 						break;
@@ -113,6 +121,22 @@ public class MainServer {
 		};
 		threadPool = Executors.newCachedThreadPool();
 		threadPool.submit(thread);
+	
+		//웹캠으로부터 영상 이미지를 캡쳐해서 설정하는 스레드
+		Runnable thread2 = new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					bm = MainServer.webcam.getImage();
+					im = new ImageIcon(bm);
+					img = im.getImage();
+					changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
+					changeIcon = new ImageIcon(changeImg);
+					MainServer.l.setIcon(changeIcon);
+				}
+			}
+		};
+		threadPool.submit(thread2);
 	}
 
 	public void stopServer() {
@@ -122,6 +146,7 @@ public class MainServer {
 			while (it.hasNext()) {
 				Handler client = it.next();
 				client.socket.close();
+				client.msgSocket.close();
 				it.remove();
 			}
 
@@ -134,7 +159,7 @@ public class MainServer {
 
 	public static void main(String[] args) {
 		MainServer m = new MainServer();
-		m.startServer("localhost", 55555);
+		m.startServer("localhost", 55555, 44444);
 	}
 
 }
