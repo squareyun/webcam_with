@@ -6,23 +6,23 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-// ÇÑ ¸íÀÇ Å¬¶óÀÌ¾ğÆ®¿Í Åë½ÅÇÏµµ·Ï ÇÏ´Â Å¬·¡½º
+// í•œ ëª…ì˜ í´ë¼ì´ì–¸íŠ¸ì™€ í†µì‹ í•˜ë„ë¡ í•˜ëŠ” í´ë˜ìŠ¤
 public class Handler {
 	Socket socket;
 	Socket msgSocket;
-
 	public ObjectOutputStream dout;
 	public OutputStream msgOut;
+	
+	public static String userName = "";
 	
 	public Handler(Socket socket, Socket msgSocket) {
 		this.socket = socket;
 		this.msgSocket = msgSocket;
-		
 		sendVideo();
 		receive();
 	}
-	
-	// Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ¸Ş¼¼Áö¸¦ ¹ŞÀ½
+
+	// í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë©”ì„¸ì§€ë¥¼ ë°›ìŒ
 	public void receive() {
 		Runnable thread = new Runnable() {
 			@Override
@@ -33,17 +33,45 @@ public class Handler {
 						byte[] buffer = new byte[512];
 						int length = msgIn.read(buffer);
 						if(length == -1) throw new IOException();
-						System.out.println("[¸Ş¼¼Áö ¼ö½Å ¼º°ø] "
-								+ socket.getRemoteSocketAddress()
+						System.out.println("[ë©”ì„¸ì§€ ìˆ˜ì‹  ì„±ê³µ] "
+								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
-						String message = new String(buffer, 0, length, "UTF-8");
+						
+						String msg = new String(buffer, 0, length, "UTF-8");
+						String msg1 = new String(buffer, 0, length, "UTF-8");
+						
+						String[] msgs = msg.split("\\|");
+						switch(msgs[0]) {
+						case "100": // ì…ì¥ ë©”ì„¸ì§€
+							userName = msgs[1];
+							msg = "**** '" + msgs[1] + "' ë‹˜ì´ ì…ì¥í•˜ì…¨ìŠµë‹ˆë‹¤." + "****";
+							msg1 = "";
+							break;
+						case "101": // ì±„íŒ…
+							if(MainServer.question.getText().equals(msgs[2])) //ì •ë‹µì‹œ ì¶œë ¥
+							{
+								msg = msgs[1] + ": " + msgs[2] + ">> ì •ë‹µ";
+								msg1 = msgs[1] + " 1ì " +"\n";
+							}
+							else //ì˜¤ë‹µì‹œ ì¶œë ¥
+							{
+								msg = msgs[1] + ">> " + msgs[2];
+								msg1 = "\0";
+							}
+							break;
+						}
+						MainServer.rankArea.append(msg1);
+						MainServer.rankArea.setCaretPosition(MainServer.rankArea.getDocument().getLength());
+						MainServer.chatLogArea.append(msg + "\n");
+						MainServer.chatLogArea.setCaretPosition(MainServer.chatLogArea.getDocument().getLength());
+
 						for(Handler user : MainServer.users) {
-							user.send(message);
+							user.send(msg);
 						}
 					}
 				}catch (Exception e) {
 					try {
-						System.out.println("[¸Ş¼¼Áö ¼ö½Å ¿À·ù] "
+						System.out.println("[ë©”ì„¸ì§€ ìˆ˜ì‹  ì˜¤ë¥˜] "
 								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						MainServer.users.remove(Handler.this);
@@ -57,7 +85,7 @@ public class Handler {
 		MainServer.threadPool.submit(thread);
 	}
 	
-	// ÇØ´ç Å¬¶óÀÌ¾ğÆ®¿¡°Ô ¸Ş¼¼Áö¸¦ Àü¼Û
+	// í•´ë‹¹ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë©”ì„¸ì§€ë¥¼ ì „ì†¡
 	public void send(String message) {
 		Runnable thread = new Runnable() {
 			@Override
@@ -69,10 +97,11 @@ public class Handler {
 					msgOut.flush();
 				} catch (Exception e) {
 					try {
-						System.out.println("[¸Ş¼¼Áö ¼Û½Å ¿À·ù] "
+						System.out.println("[ë©”ì„¸ì§€ ì†¡ì‹  ì˜¤ë¥˜] "
 								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						MainServer.users.remove(Handler.this);
+						msgSocket.close();
 					} catch (Exception e2) {
 						e2.printStackTrace();
 					}
@@ -82,14 +111,14 @@ public class Handler {
 		MainServer.threadPool.submit(thread);
 	}
 	
+	// í•´ë‹¹ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë¹„ë””ì˜¤ ì „ì†¡
 	public void sendVideo() {
 		try {
 			dout = new ObjectOutputStream(socket.getOutputStream());
 		} catch (IOException e) {
-			System.out.println("0¹ø ¿¡·¯");
+			System.out.println("0ë²ˆ ì—ëŸ¬");
 			e.printStackTrace();
 		}
-		// Å¬¶óÀÌ¾ğÆ®¿¡°Ô ºñµğ¿À Àü¼Û
 		Runnable thread = new Runnable() {
 			@Override
 			public void run() {
@@ -105,6 +134,5 @@ public class Handler {
 			}
 		};
 		MainServer.threadPool.submit(thread);
-	}
-	
+	}	
 }
