@@ -1,6 +1,8 @@
 package client;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -13,11 +15,14 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -34,7 +39,7 @@ public class MainClient {
 	public static String userName;
 	public static JLabel webcamLabel;
 	JTextField chatField;
-	JTextField txt3;
+	JTextField question;
 	JTextArea rankArea;
 	static JTextArea chatLogArea;
 
@@ -102,6 +107,7 @@ public class MainClient {
 							throw new IOException();
 						String message = new String(buffer, 0, length, "UTF-8");
 						chatLogArea.append(message + "\n");
+						chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
 					} catch (Exception e) {
 						stopClient();
 						break;
@@ -132,8 +138,8 @@ public class MainClient {
 		frame = new JFrame();
 		chatField = new JTextField("");
 		rankArea = new JTextArea("");
-		txt3 = new JTextField("");
-		chatLogArea = new JTextArea("");
+		question = new JTextField("");
+		chatLogArea = new JTextArea(11, 1);
 		webcamLabel = new JLabel();
 		frame.setTitle("Client");
 		JButton exitBtn = new JButton("나가기");
@@ -142,30 +148,55 @@ public class MainClient {
 
 		chatLogArea.setEditable(false); // 수정 불가능하게
 		rankArea.setEditable(false);
-		txt3.setEditable(false);
+		question.setEditable(false);
 		chatLogArea.setLineWrap(true); // 자동 줄바꿈
 		rankArea.setLineWrap(true);
+		
+		frame.setLayout(new BorderLayout());
+		
+		// 상단 구성
+		JPanel panel1 = new JPanel();
+		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+		JPanel panel1_1 = new JPanel(new BorderLayout());
+		JPanel panel1_2 = new JPanel(new BorderLayout(23, 13));
+		panel1_1.add(webcamLabel);
+		panel1_2.add(BorderLayout.NORTH, question);
+		panel1_2.add(BorderLayout.SOUTH, rankArea);
 
-		frame.setLayout(null);
-		chatLogArea.setBounds(10, 500, 620, 200); // 채팅내역
-		chatField.setBounds(10, 710, 520, 30); // 채팅치는곳
-		rankArea.setBounds(670, 70, 180, 410); // 점수판
-		txt3.setBounds(720, 20, 100, 40);
-		exitBtn.setBounds(680, 710, 140, 30);
-		sendBtn.setBounds(530, 710, 100, 30);
-		changeBtn.setBounds(680, 630, 140, 40);
-		webcamLabel.setSize(640, 480);
+		question.setPreferredSize(new Dimension(100, 40));
+		rankArea.setPreferredSize(new Dimension(180, 410));
+		
+		panel1.add(panel1_1);
+		panel1.add(panel1_2);
+		
+		// 하단 구성
+		JPanel panel2 = new JPanel(new BorderLayout(0, 0));
+		JPanel panel2_left = new JPanel(new BorderLayout(0, 0));
+		JPanel panel2_right = new JPanel(new BorderLayout(0, 0));
+		
+		JScrollPane scrollArea = new JScrollPane(chatLogArea);
+		panel2_left.add(BorderLayout.NORTH, scrollArea);
+		
+		JPanel panel2_left_south = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3));
+		panel2_left_south.add(chatField);
+		chatField.setPreferredSize(new Dimension(535, 30));
+		panel2_left_south.add(sendBtn);
+		sendBtn.setPreferredSize(new Dimension(100, 30));
+		panel2_left.add(panel2_left_south);
+		
+		exitBtn.setPreferredSize(new Dimension(160, 30));
+		changeBtn.setPreferredSize(new Dimension(160, 40));
+		panel2_right.add(BorderLayout.SOUTH, exitBtn);
+		panel2_right.add(BorderLayout.NORTH, changeBtn);
 
-		// 프레임에 컴포넌트 추가
-		frame.add(webcamLabel);
-		frame.add(chatField);
-		frame.add(rankArea);
-		frame.add(txt3);
-		frame.add(chatLogArea);
-		frame.add(exitBtn);
-		frame.add(changeBtn);
-		frame.add(sendBtn);
+		panel2.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 25));
 
+		panel2.add(BorderLayout.WEST, panel2_left);
+		panel2.add(BorderLayout.EAST, panel2_right);
+		
+		frame.add(BorderLayout.CENTER, panel1);
+		frame.add(BorderLayout.SOUTH, panel2);
+		
 		// 프레임 보이기
 		frame.setPreferredSize(new Dimension(880, 790));
 		frame.pack();

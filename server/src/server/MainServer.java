@@ -1,7 +1,10 @@
 package server;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -16,10 +19,13 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -43,7 +49,7 @@ public class MainServer {
 	ServerSocket msgServerSocket;
 
 	JTextField chatField;
-	JTextField txt3;
+	JTextField question;
 	JTextArea rankArea;
 	static JTextArea chatLogArea;
 	
@@ -128,42 +134,67 @@ public class MainServer {
 		frame = new JFrame();
 		chatField = new JTextField("");
 		rankArea = new JTextArea("");
-		chatLogArea = new JTextArea("");
-		txt3 = new JTextField("");
+		question = new JTextField("");
+		chatLogArea = new JTextArea(11, 1);
 		webcamLabel = new JLabel();
 		frame.setTitle("Server");
 		JButton exitBtn = new JButton("나가기");
 		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
 
-		chatLogArea.setEditable(false); 	// 수정 불가능하게
+		chatLogArea.setEditable(false); // 수정 불가능하게
 		rankArea.setEditable(false);
-		txt3.setEditable(false);
-		chatLogArea.setLineWrap(true);	// 자동 줄바꿈
+		question.setEditable(false);
+		chatLogArea.setLineWrap(true); // 자동 줄바꿈
 		rankArea.setLineWrap(true);
-			
-		frame.setLayout(null);
-		chatLogArea.setBounds(10, 500, 620, 200); // 채팅내역
-		chatField.setBounds(10, 710, 520, 30); // 채팅치는곳
-		rankArea.setBounds(670, 70, 180, 410); // 점수판
-		txt3.setBounds(720, 20, 100, 40);
-		exitBtn.setBounds(680, 710, 140, 30);
-		sendBtn.setBounds(530, 710, 100, 30);
-		changeBtn.setBounds(680, 630, 140, 40);
-		webcamLabel.setSize(640, 480);
+		
+		frame.setLayout(new BorderLayout());
+		
+		// 상단 구성
+		JPanel panel1 = new JPanel();
+		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+		JPanel panel1_1 = new JPanel(new BorderLayout());
+		JPanel panel1_2 = new JPanel(new BorderLayout(23, 13));
+		panel1_1.add(webcamLabel);
+		panel1_2.add(BorderLayout.NORTH, question);
+		panel1_2.add(BorderLayout.SOUTH, rankArea);
 
-		// 프레임에 컴포넌트 추가
-		frame.add(webcamLabel);
-		frame.add(chatField);
-		frame.add(rankArea);
-		frame.add(txt3);
-		frame.add(chatLogArea);
-		frame.add(exitBtn);
-		frame.add(changeBtn);
-		frame.add(sendBtn);
+		question.setPreferredSize(new Dimension(100, 40));
+		rankArea.setPreferredSize(new Dimension(180, 410));
+		
+		panel1.add(panel1_1);
+		panel1.add(panel1_2);
+		
+		// 하단 구성
+		JPanel panel2 = new JPanel(new BorderLayout(0, 0));
+		JPanel panel2_left = new JPanel(new BorderLayout(0, 0));
+		JPanel panel2_right = new JPanel(new BorderLayout(0, 0));
+		
+		JScrollPane scrollArea = new JScrollPane(chatLogArea);
+		panel2_left.add(BorderLayout.NORTH, scrollArea);
+		
+		JPanel panel2_left_south = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3));
+		panel2_left_south.add(chatField);
+		chatField.setPreferredSize(new Dimension(535, 30));
+		panel2_left_south.add(sendBtn);
+		sendBtn.setPreferredSize(new Dimension(100, 30));
+		panel2_left.add(panel2_left_south);
+		
+		exitBtn.setPreferredSize(new Dimension(160, 30));
+		changeBtn.setPreferredSize(new Dimension(160, 40));
+		panel2_right.add(BorderLayout.SOUTH, exitBtn);
+		panel2_right.add(BorderLayout.NORTH, changeBtn);
 
+		panel2.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 25));
+
+		panel2.add(BorderLayout.WEST, panel2_left);
+		panel2.add(BorderLayout.EAST, panel2_right);
+		
+		frame.add(BorderLayout.CENTER, panel1);
+		frame.add(BorderLayout.SOUTH, panel2);
+		
 		// 프레임 보이기
-		frame.setPreferredSize(new Dimension(880, 790));
+		frame.setPreferredSize(new Dimension(870, 780));
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -188,7 +219,8 @@ public class MainServer {
 						for(Handler user : users) {
 							user.send("방장>> " + message);
 						}
-						chatLogArea.append(message + "\n");
+						chatLogArea.append("방장>> " + message + "\n");
+						chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
 					}
 					chatField.setText("");
 				}
@@ -202,7 +234,8 @@ public class MainServer {
 					for(Handler user : users) {
 						user.send("방장>> " + message);
 					}
-					chatLogArea.append(message + "\n");
+					chatLogArea.append("방장>> " + message + "\n");
+					chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
 				}
 				chatField.setText("");
 			}

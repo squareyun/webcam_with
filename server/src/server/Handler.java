@@ -51,6 +51,7 @@ public class Handler {
 						}
 						
 						MainServer.chatLogArea.append(msg + "\n");
+						MainServer.chatLogArea.setCaretPosition(MainServer.chatLogArea.getDocument().getLength());
 						for(Handler user : MainServer.users) {
 							user.send(msg);
 						}
