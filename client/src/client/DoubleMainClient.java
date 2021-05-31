@@ -1,10 +1,10 @@
 package client;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -29,6 +29,9 @@ public class DoubleMainClient {
 	public static JFrame frame;
 	public static ObjectInputStream in;
 	
+	public static JTextField idField;
+	public static JButton submmitBtn;
+	public static String userName;
 	JTextField chatField;
 	JTextField txt3;
 	JTextArea rankArea;
@@ -45,7 +48,6 @@ public class DoubleMainClient {
 					System.out.println("[서버 접속 성공]");
 					
 					receiveVideo();
-					receive();
 				} catch (Exception e) {
 					stopClient();
 					System.out.println("[서버 접속 실패]");
@@ -163,7 +165,8 @@ public class DoubleMainClient {
 
 		// 프레임 보이기
 		frame.setPreferredSize(new Dimension(880, 790));
-		frame.setVisible(true);
+		frame.pack();
+		frame.setResizable(false);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		exitBtn.addActionListener(new ActionListener() {
@@ -179,14 +182,59 @@ public class DoubleMainClient {
 			}
 		});
 		
+		// 엔터키 누르면 전송
+		chatField.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					send(chatField.getText());
+					chatField.setText("");
+				}
+			}
+		});
+		
 
-		frame.pack();
-		frame.setResizable(false);
-		frame.setVisible(true);
+		
 	}
 	
 	public static void main(String[] args) {
+		
 		DoubleMainClient c = new DoubleMainClient();
 		c.startClient("localhost", 55555, 44444);
+		
+		JFrame loginFrame = new JFrame();
+		
+		loginFrame.setPreferredSize(new Dimension(880, 790));
+		loginFrame.setResizable(false);
+		loginFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		loginFrame.setVisible(true);
+		loginFrame.setLayout(null);
+		
+		JLabel label = new JLabel("닉네임을 입력하세요");
+		label.setBounds(365, 285, 200, 100);
+		loginFrame.add(label);
+		
+		idField = new JTextField();
+		loginFrame.add(idField);
+		idField.setBounds(350, 360, 150, 30);
+		
+		submmitBtn = new JButton("입장");
+		submmitBtn.setBounds(350, 400, 150, 30);
+		loginFrame.add(submmitBtn);
+		
+		loginFrame.pack();
+
+		submmitBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(idField.getText().equals("") || idField.getText().equals(" "))
+					JOptionPane.showMessageDialog(null, "닉네임을 입력하십시오.", "Error", JOptionPane.ERROR_MESSAGE);
+				else {
+					loginFrame.setVisible(false);
+					frame.setVisible(true);
+					c.receive();
+				}
+			}
+		});
 	}
 }
