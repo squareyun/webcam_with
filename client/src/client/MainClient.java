@@ -39,7 +39,7 @@ public class MainClient {
 	public static String userName;
 	public static JLabel webcamLabel;
 	JTextField chatField;
-	JTextField question;
+	JTextField category;
 	JTextArea rankArea;
 	static JTextArea chatLogArea;
 
@@ -138,7 +138,7 @@ public class MainClient {
 		frame = new JFrame();
 		chatField = new JTextField("");
 		rankArea = new JTextArea("");
-		question = new JTextField("");
+		category = new JTextField("");
 		chatLogArea = new JTextArea(11, 1);
 		webcamLabel = new JLabel();
 		frame.setTitle("Client");
@@ -146,9 +146,10 @@ public class MainClient {
 		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
 
+		category.setHorizontalAlignment(JTextField.CENTER); // text 중앙정렬
 		chatLogArea.setEditable(false); // 수정 불가능하게
 		rankArea.setEditable(false);
-		question.setEditable(false);
+		category.setEditable(false);
 		chatLogArea.setLineWrap(true); // 자동 줄바꿈
 		rankArea.setLineWrap(true);
 		
@@ -160,10 +161,10 @@ public class MainClient {
 		JPanel panel1_1 = new JPanel(new BorderLayout());
 		JPanel panel1_2 = new JPanel(new BorderLayout(23, 13));
 		panel1_1.add(webcamLabel);
-		panel1_2.add(BorderLayout.NORTH, question);
+		panel1_2.add(BorderLayout.NORTH, category);
 		panel1_2.add(BorderLayout.SOUTH, rankArea);
 
-		question.setPreferredSize(new Dimension(100, 40));
+		category.setPreferredSize(new Dimension(100, 40));
 		rankArea.setPreferredSize(new Dimension(180, 410));
 		
 		panel1.add(panel1_1);

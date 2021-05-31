@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -142,6 +141,7 @@ public class MainServer {
 		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
 
+		question.setHorizontalAlignment(JTextField.CENTER); // text 중앙정렬
 		chatLogArea.setEditable(false); // 수정 불가능하게
 		rankArea.setEditable(false);
 		question.setEditable(false);
