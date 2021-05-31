@@ -1,6 +1,13 @@
 package server;
 
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -13,8 +20,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.github.sarxos.webcam.Webcam;
@@ -24,7 +34,7 @@ public class DoubleMainServer {
 	public static ExecutorService threadPool;
 	public static Vector<DoubleHandler> users = new Vector<DoubleHandler>();
 	public static Webcam webcam;
-	public static JLabel l;
+	public static JLabel webcamLabel;
 	public static JFrame frame;
 	public static BufferedImage bm;
 	public static ImageIcon im;
@@ -35,6 +45,11 @@ public class DoubleMainServer {
 	ServerSocket serverSocket;
 	ServerSocket msgServerSocket;
 
+	JTextField chatField;
+	JTextField txt3;
+	JTextArea rankArea;
+	static JTextArea chatLogArea;
+	
 	public void startServer(String IP, int port, int msgPort) {
 		try {
 			serverSocket = new ServerSocket(port);
@@ -51,14 +66,8 @@ public class DoubleMainServer {
 		webcam.open(true);
 		Webcam.getDiscoveryService().setEnabled(false);
 		Webcam.getDiscoveryService().stop();
-		frame = new JFrame("Server");
-		frame.setSize(700, 700);
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		l = new JLabel();
-		l.setVisible(true);
 		
-		frame.add(l);
-		frame.setVisible(true);
+		setGui();
 		
 		// 클라이언트 접속 대기
 		Runnable thread = new Runnable() {
@@ -93,7 +102,7 @@ public class DoubleMainServer {
 					img = im.getImage();
 					changeImg = img.getScaledInstance(640, 480, Image.SCALE_SMOOTH);
 					changeIcon = new ImageIcon(changeImg);
-					DoubleMainServer.l.setIcon(changeIcon);
+					DoubleMainServer.webcamLabel.setIcon(changeIcon);
 				}
 			}
 		};
@@ -118,6 +127,67 @@ public class DoubleMainServer {
 		}
 	}
 
+	public void setGui() {
+		frame = new JFrame();
+		chatField = new JTextField("");
+		rankArea = new JTextArea("");
+		txt3 = new JTextField("");
+		chatLogArea = new JTextArea("");
+		webcamLabel = new JLabel();
+		frame.setTitle("Client");
+		JButton exitBtn = new JButton("나가기");
+		JButton changeBtn = new JButton("문제 변경");
+		JButton sendBtn = new JButton("전송");
+
+		chatLogArea.setEditable(false); 	// 수정 불가능하게
+		rankArea.setEditable(false);
+		txt3.setEditable(false);
+		chatLogArea.setLineWrap(true);	// 자동 줄바꿈
+		rankArea.setLineWrap(true);
+			
+		frame.setLayout(null);
+		chatLogArea.setBounds(10, 500, 620, 200); // 채팅내역
+		chatField.setBounds(10, 710, 520, 30); // 채팅치는곳
+		rankArea.setBounds(670, 70, 180, 410); // 점수판
+		txt3.setBounds(720, 20, 100, 40);
+		exitBtn.setBounds(680, 710, 140, 30);
+		sendBtn.setBounds(530, 710, 100, 30);
+		changeBtn.setBounds(680, 630, 140, 40);
+		webcamLabel.setSize(640, 480);
+
+		// 프레임에 컴포넌트 추가
+		frame.add(webcamLabel);
+		frame.add(chatField);
+		frame.add(rankArea);
+		frame.add(txt3);
+		frame.add(chatLogArea);
+		frame.add(exitBtn);
+		frame.add(changeBtn);
+		frame.add(sendBtn);
+
+		// 프레임 보이기
+		frame.setPreferredSize(new Dimension(880, 790));
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		exitBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		
+		// 창 열렸을 때 chatFiled에 포커스 주기
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowOpened(WindowEvent e) {
+				chatField.requestFocus();
+			}
+		});
+
+		frame.pack();
+		frame.setResizable(false);
+		frame.setVisible(true);
+	}
+	
 	public static void main(String[] args) {
 		DoubleMainServer m = new DoubleMainServer();
 		m.startServer("localhost", 55555, 44444);
