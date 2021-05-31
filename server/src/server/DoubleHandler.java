@@ -35,9 +35,17 @@ public class DoubleHandler {
 								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						
-						String meesage = new String(buffer, 0, length, "UTF-8");
+						String msg = new String(buffer, 0, length, "UTF-8");
+						
+						String[] msgs = msg.split("\\|");
+						switch(msgs[0]) {
+						case "100":
+							msg = "**** '" + msgs[1] + "' ¥‘¿Ã ¿‘¿Â«œºÃΩ¿¥œ¥Ÿ." + "****";
+						}
+						
+						DoubleMainServer.chatLogArea.append(msg + "\n");
 						for(DoubleHandler user : DoubleMainServer.users) {
-							user.send(meesage);
+							user.send(msg);
 						}
 					}
 				}catch (Exception e) {

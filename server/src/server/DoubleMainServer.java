@@ -2,16 +2,11 @@ package server;
 
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
@@ -50,7 +45,7 @@ public class DoubleMainServer {
 	JTextArea rankArea;
 	static JTextArea chatLogArea;
 	
-	public void startServer(String IP, int port, int msgPort) {
+	public void startServer(int port, int msgPort) {
 		try {
 			serverSocket = new ServerSocket(port);
 			msgServerSocket = new ServerSocket(msgPort);
@@ -131,10 +126,10 @@ public class DoubleMainServer {
 		frame = new JFrame();
 		chatField = new JTextField("");
 		rankArea = new JTextArea("");
-		txt3 = new JTextField("");
 		chatLogArea = new JTextArea("");
+		txt3 = new JTextField("");
 		webcamLabel = new JLabel();
-		frame.setTitle("Client");
+		frame.setTitle("Server");
 		JButton exitBtn = new JButton("나가기");
 		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
@@ -190,7 +185,7 @@ public class DoubleMainServer {
 	
 	public static void main(String[] args) {
 		DoubleMainServer m = new DoubleMainServer();
-		m.startServer("localhost", 55555, 44444);
+		m.startServer(55555, 44444);
 	}
 
 }

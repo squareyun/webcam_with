@@ -23,30 +23,30 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 public class DoubleMainClient {
-	Socket socket;
-	Socket msgSocket;
+	static Socket socket;
+	static Socket msgSocket;
 	public static JLabel webcamLabel;
 	public static JFrame frame;
 	public static ObjectInputStream in;
-	
+
 	public static JTextField idField;
 	public static JButton submmitBtn;
 	public static String userName;
 	JTextField chatField;
 	JTextField txt3;
 	JTextArea rankArea;
-	JTextArea chatLogArea;
-	
+	static JTextArea chatLogArea;
+
 	public void startClient(String IP, int port, int msgPort) {
 		setGui();
-		
+
 		Thread thread = new Thread() {
 			public void run() {
 				try {
 					socket = new Socket(IP, port);
 					msgSocket = new Socket(IP, msgPort);
 					System.out.println("[서버 접속 성공]");
-					
+
 					receiveVideo();
 				} catch (Exception e) {
 					stopClient();
@@ -56,18 +56,17 @@ public class DoubleMainClient {
 		};
 		thread.start();
 	}
-	
+
 	public void receiveVideo() {
 		try {
 			in = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e1) {
-			System.out.println("1번에러");
 			e1.printStackTrace();
 			stopClient();
 		}
-		while(true) {
+		while (true) {
 			try {
-				webcamLabel.setIcon((ImageIcon)in.readObject());
+				webcamLabel.setIcon((ImageIcon) in.readObject());
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 				stopClient();
@@ -75,29 +74,32 @@ public class DoubleMainClient {
 		}
 	}
 
-	public void stopClient() {
-		try {
-			if(socket != null && !socket.isClosed()) {
-				frame.dispose();
+	public static void stopClient() {
+		/*try {
+			frame.dispose();
+			if (socket != null && !socket.isClosed()) {
 				socket.close();
-				
 			}
-		}catch (Exception e) {
+			if (msgSocket != null && !msgSocket.isClosed()) {
+				msgSocket.close();
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
-	
-	public void receive() {
+
+	public static void receive() {
 		Thread thread = new Thread() {
 			public void run() {
-				while(true) {
+				while (true) {
 					try {
 						InputStream msgIn = msgSocket.getInputStream();
 						byte[] buffer = new byte[512];
 						int length = msgIn.read(buffer);
-						if(length == -1) throw new IOException();
+						if (length == -1)
+							throw new IOException();
 						String message = new String(buffer, 0, length, "UTF-8");
-						System.out.println(message);
+						chatLogArea.append(message + "\n");
 					} catch (Exception e) {
 						stopClient();
 						break;
@@ -107,8 +109,8 @@ public class DoubleMainClient {
 		};
 		thread.start();
 	}
-	
-	public void send(String message) {
+
+	public static void send(String message) {
 		Thread thread = new Thread() {
 			public void run() {
 				try {
@@ -123,7 +125,7 @@ public class DoubleMainClient {
 		};
 		thread.start();
 	}
-	
+
 	public void setGui() {
 		frame = new JFrame();
 		chatField = new JTextField("");
@@ -136,13 +138,12 @@ public class DoubleMainClient {
 		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
 
-		chatLogArea.setEditable(false); 	// 수정 불가능하게
+		chatLogArea.setEditable(false); // 수정 불가능하게
 		rankArea.setEditable(false);
 		txt3.setEditable(false);
-		chatLogArea.setLineWrap(true);	// 자동 줄바꿈
+		chatLogArea.setLineWrap(true); // 자동 줄바꿈
 		rankArea.setLineWrap(true);
-		
-		
+
 		frame.setLayout(null);
 		chatLogArea.setBounds(10, 500, 620, 200); // 채팅내역
 		chatField.setBounds(10, 710, 520, 30); // 채팅치는곳
@@ -174,67 +175,88 @@ public class DoubleMainClient {
 				System.exit(0);
 			}
 		});
-		
+
 		// 창 열렸을 때 chatFiled에 포커스 주기
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e) {
 				chatField.requestFocus();
 			}
 		});
-		
+
 		// 엔터키 누르면 전송
 		chatField.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-					send(chatField.getText());
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					String message = chatField.getText();
+					if (!message.equals(""))
+						send(message);
 					chatField.setText("");
 				}
 			}
 		});
-		
 
-		
+		sendBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String message = chatField.getText();
+				if (!message.equals(""))
+					send(message);
+				chatField.setText("");
+			}
+		});
+
 	}
-	
-	public static void main(String[] args) {
-		
-		DoubleMainClient c = new DoubleMainClient();
-		c.startClient("localhost", 55555, 44444);
-		
+
+	public static void login() {
 		JFrame loginFrame = new JFrame();
-		
+
 		loginFrame.setPreferredSize(new Dimension(880, 790));
 		loginFrame.setResizable(false);
 		loginFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		loginFrame.setVisible(true);
 		loginFrame.setLayout(null);
-		
+
 		JLabel label = new JLabel("닉네임을 입력하세요");
 		label.setBounds(365, 285, 200, 100);
 		loginFrame.add(label);
-		
+
 		idField = new JTextField();
 		loginFrame.add(idField);
 		idField.setBounds(350, 360, 150, 30);
-		
+
 		submmitBtn = new JButton("입장");
 		submmitBtn.setBounds(350, 400, 150, 30);
 		loginFrame.add(submmitBtn);
-		
+
 		loginFrame.pack();
 
+		loginFrame.addWindowListener(new WindowAdapter() {
+			public void windowOpened(WindowEvent e) {
+				idField.requestFocus();
+			}
+		});
+
 		submmitBtn.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(idField.getText().equals("") || idField.getText().equals(" "))
+				if (idField.getText().equals("") || idField.getText().equals(" "))
 					JOptionPane.showMessageDialog(null, "닉네임을 입력하십시오.", "Error", JOptionPane.ERROR_MESSAGE);
 				else {
+					userName = idField.getText();
 					loginFrame.setVisible(false);
 					frame.setVisible(true);
-					c.receive();
+					receive();
+					send("100|" + userName);
 				}
 			}
 		});
+	}
+
+	public static void main(String[] args) {
+
+		DoubleMainClient c = new DoubleMainClient();
+		c.startClient("localhost", 55555, 44444);
+
+		login();
 	}
 }
