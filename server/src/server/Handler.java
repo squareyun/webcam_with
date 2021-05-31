@@ -45,6 +45,9 @@ public class Handler {
 							userName = msgs[1];
 							msg = "**** '" + msgs[1] + "' 님이 입장하셨습니다." + "****";
 							break;
+						case "101": // 채팅
+							msg = msgs[1] + ">> " + msgs[2];
+							break;
 						}
 						
 						MainServer.chatLogArea.append(msg + "\n");

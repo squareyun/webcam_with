@@ -25,13 +25,14 @@ import javax.swing.WindowConstants;
 public class MainClient {
 	static Socket socket;
 	static Socket msgSocket;
-	public static JLabel webcamLabel;
-	public static JFrame frame;
 	public static ObjectInputStream in;
+	public static JFrame loginFrame;
+	public static JFrame frame;
 
 	public static JTextField idField;
 	public static JButton submmitBtn;
 	public static String userName;
+	public static JLabel webcamLabel;
 	JTextField chatField;
 	JTextField txt3;
 	JTextArea rankArea;
@@ -77,6 +78,7 @@ public class MainClient {
 	public static void stopClient() {
 		try {
 			frame.dispose();
+			loginFrame.dispose();
 			if (socket != null && !socket.isClosed()) {
 				socket.close();
 			}
@@ -189,7 +191,7 @@ public class MainClient {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					String message = chatField.getText();
 					if (!message.equals(""))
-						send(userName + ": " + message);
+						send("101|" + userName + "|" + message);
 					chatField.setText("");
 				}
 			}
@@ -199,7 +201,7 @@ public class MainClient {
 			public void actionPerformed(ActionEvent e) {
 				String message = chatField.getText();
 				if (!message.equals(""))
-					send(userName + ": " + message);
+					send("101|" + userName + "|" + message);
 				chatField.setText("");
 			}
 		});
@@ -207,7 +209,7 @@ public class MainClient {
 	}
 
 	public static void login() {
-		JFrame loginFrame = new JFrame();
+		loginFrame = new JFrame();
 
 		loginFrame.setPreferredSize(new Dimension(880, 790));
 		loginFrame.setResizable(false);
@@ -241,6 +243,8 @@ public class MainClient {
 			public void actionPerformed(ActionEvent e) {
 				if (idField.getText().equals("") || idField.getText().equals(" "))
 					JOptionPane.showMessageDialog(null, "닉네임을 입력하십시오.", "Error", JOptionPane.ERROR_MESSAGE);
+				else if(idField.getText().startsWith("방장"))
+					JOptionPane.showMessageDialog(null, "방장으로 시작하는 이름은 사용할 수 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
 				else {
 					userName = idField.getText();
 					loginFrame.setVisible(false);
