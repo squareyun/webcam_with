@@ -56,7 +56,7 @@ public class Handler {
 							else //오답시 출력
 							{
 								msg = msgs[1] + ">> " + msgs[2];
-								msg1 = "\0";
+								msg1 = "";
 							}
 							break;
 						}
