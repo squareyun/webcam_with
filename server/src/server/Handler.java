@@ -9,14 +9,19 @@ import java.net.Socket;
 // 한 명의 클라이언트와 통신하도록 하는 클래스
 public class Handler {
 	Socket socket;
+	Socket msgSocket;
 	public ObjectOutputStream dout;
+	public OutputStream msgOut;
 	
-	public Handler(Socket socket) {
+	public static String userName = "";
+	
+	public Handler(Socket socket, Socket msgSocket) {
 		this.socket = socket;
-		receive();
+		this.msgSocket = msgSocket;
 		sendVideo();
+		receive();
 	}
-	
+
 	// 클라이언트로부터 메세지를 받음
 	public void receive() {
 		Runnable thread = new Runnable() {
@@ -24,28 +29,36 @@ public class Handler {
 			public void run() {
 				try {
 					while(true) {
-						InputStream in = socket.getInputStream();
+						InputStream msgIn = msgSocket.getInputStream();
 						byte[] buffer = new byte[512];
-						
-						int length = in.read(buffer);
+						int length = msgIn.read(buffer);
 						if(length == -1) throw new IOException();
 						System.out.println("[메세지 수신 성공] "
-								+ socket.getRemoteSocketAddress()
+								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						
-						String message = new String(buffer, 0, length, "UTF-8");
-						MainServer.chatLogArea.append(message);
+						String msg = new String(buffer, 0, length, "UTF-8");
+						
+						String[] msgs = msg.split("\\|");
+						switch(msgs[0]) {
+						case "100": // 입장 메세지
+							userName = msgs[1];
+							msg = "**** '" + msgs[1] + "' 님이 입장하셨습니다." + "****";
+							break;
+						}
+						
+						MainServer.chatLogArea.append(msg + "\n");
 						for(Handler user : MainServer.users) {
-							user.send(message);
+							user.send(msg);
 						}
 					}
 				}catch (Exception e) {
 					try {
 						System.out.println("[메세지 수신 오류] "
-								+ socket.getRemoteSocketAddress()
+								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						MainServer.users.remove(Handler.this);
-						socket.close();
+						msgSocket.close();
 					}catch (Exception e2) {
 						e2.printStackTrace();
 					}
@@ -56,22 +69,22 @@ public class Handler {
 	}
 	
 	// 해당 클라이언트에게 메세지를 전송
-	public void send(String meesage) {
+	public void send(String message) {
 		Runnable thread = new Runnable() {
 			@Override
 			public void run() {
 				try {
-					OutputStream out = socket.getOutputStream();
-					byte[] buffer = meesage.getBytes("UTF-8");
-					out.write(buffer);
-					out.flush();
+					msgOut = msgSocket.getOutputStream();
+					byte[] buffer = message.getBytes("UTF-8");
+					msgOut.write(buffer);
+					msgOut.flush();
 				} catch (Exception e) {
 					try {
 						System.out.println("[메세지 송신 오류] "
-								+ socket.getRemoteSocketAddress()
+								+ msgSocket.getRemoteSocketAddress()
 								+ ": " + Thread.currentThread().getName());
 						MainServer.users.remove(Handler.this);
-						socket.close();
+						msgSocket.close();
 					} catch (Exception e2) {
 						e2.printStackTrace();
 					}

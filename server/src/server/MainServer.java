@@ -2,14 +2,11 @@ package server;
 
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
@@ -21,6 +18,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.github.sarxos.webcam.Webcam;
@@ -38,17 +37,18 @@ public class MainServer {
 	public static Image changeImg;
 	public static ImageIcon changeIcon;
 	
-	
-	TextField chatField;
-	TextField rankField;
-	TextField txt3;
-	static TextArea chatLogArea;
-	
 	ServerSocket serverSocket;
+	ServerSocket msgServerSocket;
 
-	public void startServer(String IP, int port) {
+	JTextField chatField;
+	JTextField txt3;
+	JTextArea rankArea;
+	static JTextArea chatLogArea;
+	
+	public void startServer(int port, int msgPort) {
 		try {
 			serverSocket = new ServerSocket(port);
+			msgServerSocket = new ServerSocket(msgPort);
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!serverSocket.isClosed())
@@ -71,7 +71,8 @@ public class MainServer {
 				while (true) {
 					try {
 						Socket socket = serverSocket.accept();
-						users.add(new Handler(socket));
+						Socket msgSocket = msgServerSocket.accept();
+						users.add(new Handler(socket, msgSocket));
 						System.out.println("[클라이언트 접속] " + socket.getRemoteSocketAddress() + ": "
 								+ Thread.currentThread().getName());
 					} catch (Exception e) {
@@ -110,6 +111,7 @@ public class MainServer {
 			while (it.hasNext()) {
 				Handler client = it.next();
 				client.socket.close();
+				client.msgSocket.close();
 				it.remove();
 			}
 
@@ -122,61 +124,68 @@ public class MainServer {
 
 	public void setGui() {
 		frame = new JFrame();
-		chatField = new TextField("채팅");
-		rankField = new TextField("랭킹");
-		txt3 = new TextField("");
-		chatLogArea = new TextArea("채팅 내역");
+		chatField = new JTextField("");
+		rankArea = new JTextArea("");
+		chatLogArea = new JTextArea("");
+		txt3 = new JTextField("");
 		webcamLabel = new JLabel();
 		frame.setTitle("Server");
 		JButton exitBtn = new JButton("나가기");
-		JButton btn2 = new JButton("문제 변경");
-		JButton btn3 = new JButton("??");
+		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
-		
-		rankField.setEditable(false);
-		chatLogArea.setEditable(false);
-		
+
+		chatLogArea.setEditable(false); 	// 수정 불가능하게
+		rankArea.setEditable(false);
+		txt3.setEditable(false);
+		chatLogArea.setLineWrap(true);	// 자동 줄바꿈
+		rankArea.setLineWrap(true);
+			
 		frame.setLayout(null);
-		chatLogArea.setBounds(10,500,620,200); //채팅내역
-		chatField .setBounds(10,710,520,40); //채팅치는곳
-		rankField.setBounds(670,70,200,410); //점수판
-		txt3.setBounds(720,20,100,40);
-		exitBtn.setBounds(720,700,100,40);
-		sendBtn.setBounds(530,710,100,40);
-		btn2.setBounds(720,630,100,40);
-		btn3.setBounds(720,560,100,40);
-		webcamLabel.setSize(640,480);
-		
-		//프레임에 컴포넌트 추가
+		chatLogArea.setBounds(10, 500, 620, 200); // 채팅내역
+		chatField.setBounds(10, 710, 520, 30); // 채팅치는곳
+		rankArea.setBounds(670, 70, 180, 410); // 점수판
+		txt3.setBounds(720, 20, 100, 40);
+		exitBtn.setBounds(680, 710, 140, 30);
+		sendBtn.setBounds(530, 710, 100, 30);
+		changeBtn.setBounds(680, 630, 140, 40);
+		webcamLabel.setSize(640, 480);
+
+		// 프레임에 컴포넌트 추가
 		frame.add(webcamLabel);
 		frame.add(chatField);
-		frame.add(rankField);
+		frame.add(rankArea);
 		frame.add(txt3);
 		frame.add(chatLogArea);
 		frame.add(exitBtn);
-		frame.add(btn2);
-		frame.add(btn3);
+		frame.add(changeBtn);
 		frame.add(sendBtn);
-		
-		//프레임 보이기
-		frame.setPreferredSize(new Dimension(900, 800));
+
+		// 프레임 보이기
+		frame.setPreferredSize(new Dimension(880, 790));
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		
+
 		exitBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
+			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
 		});
 		
+		// 창 열렸을 때 chatFiled에 포커스 주기
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowOpened(WindowEvent e) {
+				chatField.requestFocus();
+			}
+		});
+
 		frame.pack();
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 	
 	public static void main(String[] args) {
 		MainServer m = new MainServer();
-		m.startServer("localhost", 55555);
+		m.startServer(55555, 44444);
 	}
 
 }
