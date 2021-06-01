@@ -52,12 +52,12 @@ public class MainClient {
 				try {
 					socket = new Socket(IP, port);
 					msgSocket = new Socket(IP, msgPort);
-					System.out.println("[ì„œë²„ ì ‘ì† ì„±ê³µ]");
+					System.out.println("[¼­¹ö Á¢¼Ó ¼º°ø]");
 
 					receiveVideo();
 				} catch (Exception e) {
 					stopClient();
-					System.out.println("[ì„œë²„ ì ‘ì† ì‹¤íŒ¨]");
+					System.out.println("[¼­¹ö Á¢¼Ó ½ÇÆĞ]");
 				}
 			}
 		};
@@ -83,7 +83,7 @@ public class MainClient {
 
 	public static void stopClient() {
 		try {
-			send("300|");
+			send("300|" + userName);
 			frame.dispose();
 			loginFrame.dispose();
 			if (socket != null && !socket.isClosed()) {
@@ -111,15 +111,15 @@ public class MainClient {
 						
 						String[] msgs = message.split("\\|");
 						switch (msgs[0]) {
-						case "200": // ì¹´í…Œê³ ë¦¬ ë³€ê²½
+						case "200": // Ä«Å×°í¸® º¯°æ
 							category.setText(msgs[1]);
 							break;
-						case "300": // ì ìˆ˜í‘œ ìƒˆë¡œ ê·¸ë¦¬ê¸°
+						case "300": // Á¡¼öÇ¥ »õ·Î ±×¸®±â
 							scoreArea.setText("");
 							scoreArea.append(msgs[1]);
 							break;
 						default:
-							// ì¼ë°˜ ì±„íŒ…
+							// ÀÏ¹İ Ã¤ÆÃ
 							chatLogArea.append(message + "\n");
 							chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
 
@@ -158,19 +158,20 @@ public class MainClient {
 		chatLogArea = new JTextArea(11, 1);
 		webcamLabel = new JLabel();
 		frame.setTitle("Client");
-		JButton exitBtn = new JButton("ë‚˜ê°€ê¸°");
-		JButton sendBtn = new JButton("ì „ì†¡");
+		JButton exitBtn = new JButton("³ª°¡±â");
+		JButton changeBtn = new JButton("¹®Á¦ º¯°æ");
+		JButton sendBtn = new JButton("Àü¼Û");
 
-		category.setHorizontalAlignment(JTextField.CENTER); // text ì¤‘ì•™ì •ë ¬
-		chatLogArea.setEditable(false); // ìˆ˜ì • ë¶ˆê°€ëŠ¥í•˜ê²Œ
+		category.setHorizontalAlignment(JTextField.CENTER); // text Áß¾ÓÁ¤·Ä
+		chatLogArea.setEditable(false); // ¼öÁ¤ ºÒ°¡´ÉÇÏ°Ô
 		scoreArea.setEditable(false);
 		category.setEditable(false);
-		chatLogArea.setLineWrap(true); // ìë™ ì¤„ë°”ê¿ˆ
+		chatLogArea.setLineWrap(true); // ÀÚµ¿ ÁÙ¹Ù²Ş
 		scoreArea.setLineWrap(true);
 		
 		frame.setLayout(new BorderLayout());
 		
-		// ìƒë‹¨ êµ¬ì„±
+		// »ó´Ü ±¸¼º
 		JPanel panel1 = new JPanel();
 		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 		JPanel panel1_1 = new JPanel(new BorderLayout());
@@ -185,7 +186,7 @@ public class MainClient {
 		panel1.add(panel1_1);
 		panel1.add(panel1_2);
 		
-		// í•˜ë‹¨ êµ¬ì„±
+		// ÇÏ´Ü ±¸¼º
 		JPanel panel2 = new JPanel(new BorderLayout(0, 0));
 		JPanel panel2_left = new JPanel(new BorderLayout(0, 0));
 		JPanel panel2_right = new JPanel(new BorderLayout(0, 0));
@@ -201,7 +202,9 @@ public class MainClient {
 		panel2_left.add(panel2_left_south);
 		
 		exitBtn.setPreferredSize(new Dimension(160, 30));
+		changeBtn.setPreferredSize(new Dimension(160, 40));
 		panel2_right.add(BorderLayout.SOUTH, exitBtn);
+		panel2_right.add(BorderLayout.NORTH, changeBtn);
 
 		panel2.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 25));
 
@@ -211,7 +214,7 @@ public class MainClient {
 		frame.add(BorderLayout.CENTER, panel1);
 		frame.add(BorderLayout.SOUTH, panel2);
 		
-		// í”„ë ˆì„ ë³´ì´ê¸°
+		// ÇÁ·¹ÀÓ º¸ÀÌ±â
 		frame.setPreferredSize(new Dimension(880, 790));
 		frame.pack();
 		frame.setResizable(false);
@@ -224,14 +227,14 @@ public class MainClient {
 			}
 		});
 
-		// ì°½ ì—´ë ¸ì„ ë•Œ chatFiledì— í¬ì»¤ìŠ¤ ì£¼ê¸°
+		// Ã¢ ¿­·ÈÀ» ¶§ chatFiled¿¡ Æ÷Ä¿½º ÁÖ±â
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e) {
 				chatField.requestFocus();
 			}
 		});
 
-		// ì—”í„°í‚¤ ëˆ„ë¥´ë©´ ì „ì†¡
+		// ¿£ÅÍÅ° ´©¸£¸é Àü¼Û
 		chatField.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -263,7 +266,7 @@ public class MainClient {
 		loginFrame.setVisible(true);
 		loginFrame.setLayout(null);
 
-		JLabel label = new JLabel("ë‹‰ë„¤ì„ì„ ì…ë ¥í•˜ì„¸ìš”");
+		JLabel label = new JLabel("´Ğ³×ÀÓÀ» ÀÔ·ÂÇÏ¼¼¿ä");
 		label.setBounds(365, 285, 200, 100);
 		loginFrame.add(label);
 
@@ -271,7 +274,7 @@ public class MainClient {
 		loginFrame.add(idField);
 		idField.setBounds(350, 360, 150, 30);
 
-		submmitBtn = new JButton("ì…ì¥");
+		submmitBtn = new JButton("ÀÔÀå");
 		submmitBtn.setBounds(350, 400, 150, 30);
 		loginFrame.add(submmitBtn);
 
@@ -288,9 +291,9 @@ public class MainClient {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (idField.getText().equals("") || idField.getText().equals(" "))
-					JOptionPane.showMessageDialog(null, "ë‹‰ë„¤ì„ì„ ì…ë ¥í•˜ì‹­ì‹œì˜¤.", "Error", JOptionPane.ERROR_MESSAGE);
-				else if(idField.getText().startsWith("ë°©ì¥"))
-					JOptionPane.showMessageDialog(null, "ë°©ì¥ìœ¼ë¡œ ì‹œì‘í•˜ëŠ” ì´ë¦„ì€ ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "´Ğ³×ÀÓÀ» ÀÔ·ÂÇÏ½Ê½Ã¿À.", "Error", JOptionPane.ERROR_MESSAGE);
+				else if(idField.getText().startsWith("¹æÀå"))
+					JOptionPane.showMessageDialog(null, "¹æÀåÀ¸·Î ½ÃÀÛÇÏ´Â ÀÌ¸§Àº »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù.", "Error", JOptionPane.ERROR_MESSAGE);
 				else {
 					userName = idField.getText();
 					loginFrame.setVisible(false);
