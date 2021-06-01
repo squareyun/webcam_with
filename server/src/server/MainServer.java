@@ -54,9 +54,9 @@ public class MainServer {
 	static JTextArea scoreArea;
 	static JTextArea chatLogArea;
 	static String[][] setOfQuestion = {
-			{"¿îµ¿", "Ãà±¸", "¾ß±¸", "¹è±¸", "³ó±¸", "Ææ½Ì", "½ºÅ°", "Å×´Ï½º", "ÅÂ±Çµµ", "º¹½Ì", "´Ş¸®±â"},
-			{"µ¿¹°", "Åä³¢", "»çÀÚ", "È£¶ûÀÌ", "°í¾çÀÌ", "¸»", "ÇÏ¸¶", "±â¸°", "°³", "³Ê±¸¸®", "¾Ç¾î"},
-			{"¿µÈ­", "±«¹°", "7¹ø¹æÀÇ ¼±¹°", "±¹°¡´ëÇ¥", "¹üÁËµµ½Ã", "Å¬·¡½Ä", "ºÎ»êÇà", "±ØÇÑÁ÷¾÷", "ÇØ¿î´ë", "½Å°úÇÔ²²", "º£Å×¶û"}
+			{"ìš´ë™", "ì¶•êµ¬", "ì•¼êµ¬", "ë°°êµ¬", "ë†êµ¬", "íœì‹±", "ìŠ¤í‚¤", "í…Œë‹ˆìŠ¤", "íƒœê¶Œë„", "ë³µì‹±", "ë‹¬ë¦¬ê¸°"},
+			{"ë™ë¬¼", "í† ë¼", "ì‚¬ì", "í˜¸ë‘ì´", "ê³ ì–‘ì´", "ë§", "í•˜ë§ˆ", "ê¸°ë¦°", "ê°œ", "ë„ˆêµ¬ë¦¬", "ì•…ì–´"},
+			{"ì˜í™”", "ê´´ë¬¼", "7ë²ˆë°©ì˜ ì„ ë¬¼", "êµ­ê°€ëŒ€í‘œ", "ë²”ì£„ë„ì‹œ", "í´ë˜ì‹", "ë¶€ì‚°í–‰", "ê·¹í•œì§ì—…", "í•´ìš´ëŒ€", "ì‹ ê³¼í•¨ê»˜", "ë² í…Œë‘"}
 	};
 	static boolean startFlag = true;
 	
@@ -78,7 +78,7 @@ public class MainServer {
 		Webcam.getDiscoveryService().stop();
 		
 		setGui();
-		// Å¬¶óÀÌ¾ğÆ® Á¢¼Ó ´ë±â
+		// í´ë¼ì´ì–¸íŠ¸ ì ‘ì† ëŒ€ê¸°
 		Runnable thread = new Runnable() {
 			@Override
 			public void run() {
@@ -87,7 +87,7 @@ public class MainServer {
 						Socket socket = serverSocket.accept();
 						Socket msgSocket = msgServerSocket.accept();
 						users.add(new Handler(socket, msgSocket));
-						System.out.println("[Å¬¶óÀÌ¾ğÆ® Á¢¼Ó] " + socket.getRemoteSocketAddress() + ": "
+						System.out.println("[í´ë¼ì´ì–¸íŠ¸ ì ‘ì†] " + socket.getRemoteSocketAddress() + ": "
 								+ Thread.currentThread().getName());
 						
 					} catch (Exception e) {
@@ -102,7 +102,7 @@ public class MainServer {
 		threadPool = Executors.newCachedThreadPool();
 		threadPool.submit(thread);
 		
-		// À¥Ä·À¸·ÎºÎÅÍ ¿µ»ó ÀÌ¹ÌÁö¸¦ Ä¸ÃÄÇØ¼­ ¼³Á¤ÇÏ´Â ½º·¹µå
+		// ì›¹ìº ìœ¼ë¡œë¶€í„° ì˜ìƒ ì´ë¯¸ì§€ë¥¼ ìº¡ì³í•´ì„œ ì„¤ì •í•˜ëŠ” ìŠ¤ë ˆë“œ
 		Runnable thread2 = new Runnable() {
 			@Override
 			public void run() {
@@ -161,20 +161,20 @@ public class MainServer {
 		chatLogArea = new JTextArea(11, 1);
 		webcamLabel = new JLabel();
 		frame.setTitle("Server");
-		JButton exitBtn = new JButton("³ª°¡±â");
-		JButton changeBtn = new JButton("¹®Á¦ º¯°æ");
-		JButton sendBtn = new JButton("Àü¼Û");
+		JButton exitBtn = new JButton("ë‚˜ê°€ê¸°");
+		JButton changeBtn = new JButton("ë¬¸ì œ ë³€ê²½");
+		JButton sendBtn = new JButton("ì „ì†¡");
 
-		question.setHorizontalAlignment(JTextField.CENTER); // text Áß¾ÓÁ¤·Ä
-		chatLogArea.setEditable(false); // ¼öÁ¤ ºÒ°¡´ÉÇÏ°Ô
+		question.setHorizontalAlignment(JTextField.CENTER); // text ì¤‘ì•™ì •ë ¬
+		chatLogArea.setEditable(false); // ìˆ˜ì • ë¶ˆê°€ëŠ¥í•˜ê²Œ
 		scoreArea.setEditable(false);
 		question.setEditable(false);
-		chatLogArea.setLineWrap(true); // ÀÚµ¿ ÁÙ¹Ù²Ş
+		chatLogArea.setLineWrap(true); // ìë™ ì¤„ë°”ê¿ˆ
 		scoreArea.setLineWrap(true);
 		
 		frame.setLayout(new BorderLayout());
 		
-		// »ó´Ü ±¸¼º
+		// ìƒë‹¨ êµ¬ì„±
 		JPanel panel1 = new JPanel();
 		panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 		JPanel panel1_1 = new JPanel(new BorderLayout());
@@ -189,7 +189,7 @@ public class MainServer {
 		panel1.add(panel1_1);
 		panel1.add(panel1_2);
 		
-		// ÇÏ´Ü ±¸¼º
+		// í•˜ë‹¨ êµ¬ì„±
 		JPanel panel2 = new JPanel(new BorderLayout(0, 0));
 		JPanel panel2_left = new JPanel(new BorderLayout(0, 0));
 		JPanel panel2_right = new JPanel(new BorderLayout(0, 0));
@@ -217,7 +217,7 @@ public class MainServer {
 		frame.add(BorderLayout.CENTER, panel1);
 		frame.add(BorderLayout.SOUTH, panel2);
 		
-		// ÇÁ·¹ÀÓ º¸ÀÌ±â
+		// í”„ë ˆì„ ë³´ì´ê¸°
 		frame.setPreferredSize(new Dimension(870, 780));
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -228,7 +228,7 @@ public class MainServer {
 			}
 		});
 	
-		// Ã¢ ¿­·ÈÀ» ¶§ chatFiled¿¡ Æ÷Ä¿½º ÁÖ±â
+		// ì°½ ì—´ë ¸ì„ ë•Œ chatFiledì— í¬ì»¤ìŠ¤ ì£¼ê¸°
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e) {
 				chatField.requestFocus();
@@ -241,9 +241,9 @@ public class MainServer {
 					String message = chatField.getText();
 					if (!message.equals("")) {
 						for(Handler user : users) {
-							user.send("¹æÀå>> " + message);
+							user.send("ë°©ì¥>> " + message);
 						}
-						chatLogArea.append("¹æÀå>> " + message + "\n");
+						chatLogArea.append("ë°©ì¥>> " + message + "\n");
 						chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
 					}
 					chatField.setText("");
@@ -256,16 +256,16 @@ public class MainServer {
 				String message = chatField.getText();
 				if (!message.equals("")) {
 					for(Handler user : users) {
-						user.send("¹æÀå>> " + message);
+						user.send("ë°©ì¥>> " + message);
 					}
-					chatLogArea.append("¹æÀå>> " + message + "\n");
+					chatLogArea.append("ë°©ì¥>> " + message + "\n");
 					chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
 				}
 				chatField.setText("");
 			}
 		});
 		
-		//¹öÆ°À» ´­·¯ ¹®Á¦ ·£´ı »ı¼º
+		//ë²„íŠ¼ì„ ëˆŒëŸ¬ ë¬¸ì œ ëœë¤ ìƒì„±
         changeBtn.addActionListener(new ActionListener( ) {
         	public void actionPerformed(ActionEvent e) {
         		changeQuestion();
@@ -281,7 +281,7 @@ public class MainServer {
 		int randomCategory = (int)(Math.random() * 3);
 		int randomQuestion = (int)(Math.random() * 10) + 1;
 		
-		// Á÷Àü ¹®Á¦¿Í µ¿ÀÏÇÏ¸é ´Ù½Ã »Ì±â
+		// ì§ì „ ë¬¸ì œì™€ ë™ì¼í•˜ë©´ ë‹¤ì‹œ ë½‘ê¸°
 		if(before[0] == randomCategory && before[1] == randomQuestion) {
 			changeQuestion();
 			return;
@@ -302,7 +302,7 @@ public class MainServer {
 
 		Iterator<Handler> it = MainServer.users.iterator();
 		if (!correctUser.equals("")) {
-			// Á¡¼ö ¾÷µ¥ÀÌÆ®
+			// ì ìˆ˜ ì—…ë°ì´íŠ¸
 			while (it.hasNext()) {
 				Handler user = it.next();
 				if (user.getUserName().equals(correctUser)) {
@@ -313,11 +313,10 @@ public class MainServer {
 			}
 		}
 
-		// Á¡¼öÆÇ ´Ù½Ã ±×¸®±â
+		// ì ìˆ˜íŒ ë‹¤ì‹œ ê·¸ë¦¬ê¸°
 		scoreArea.setText("");
-		System.out.println(users.size());
 		for (int i = 0; i < users.size(); i++) {
-			String tempMsg = users.get(i).getUserName() + ">> " + users.get(i).getScore() + "Á¡\n";
+			String tempMsg = users.get(i).getUserName() + ">> " + users.get(i).getScore() + "ì \n";
 			scoreArea.append(tempMsg);
 		}
 	}
