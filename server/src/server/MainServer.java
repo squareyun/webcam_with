@@ -46,14 +46,20 @@ public class MainServer {
 	
 	ServerSocket serverSocket;
 	ServerSocket msgServerSocket;
-
+	
+	static String category;
+	static int[] before = new int[2];
 	JTextField chatField;
 	static JTextField question;
-	static JTextArea rankArea;
+	static JTextArea scoreArea;
 	static JTextArea chatLogArea;
-	String[] all = {"축구", "야구", "배구", "농구", "펜싱", "스키", "테니스", "태권도", "복싱",
-			"토끼", "사자", "호랑이", "고양이", "말", "하마", "기린",
-			"괴물", "7번방의 선물", "국가대표", "범죄도시", "클래식", "부산행", "극한직업"}; //문제
+	static String[][] setOfQuestion = {
+			{"운동", "축구", "야구", "배구", "농구", "펜싱", "스키", "테니스", "태권도", "복싱", "달리기"},
+			{"동물", "토끼", "사자", "호랑이", "고양이", "말", "하마", "기린", "개", "너구리", "악어"},
+			{"영화", "괴물", "7번방의 선물", "국가대표", "범죄도시", "클래식", "부산행", "극한직업", "해운대", "신과함께", "베테랑"}
+	};
+	static boolean startFlag = true;
+	public static boolean changeFlag = false;
 	
 	public void startServer(int port, int msgPort) {
 		try {
@@ -73,7 +79,6 @@ public class MainServer {
 		Webcam.getDiscoveryService().stop();
 		
 		setGui();
-		
 		// 클라이언트 접속 대기
 		Runnable thread = new Runnable() {
 			@Override
@@ -85,6 +90,11 @@ public class MainServer {
 						users.add(new Handler(socket, msgSocket));
 						System.out.println("[클라이언트 접속] " + socket.getRemoteSocketAddress() + ": "
 								+ Thread.currentThread().getName());
+						if(startFlag) {
+							changeQuestion();
+							startFlag = false;
+						}
+						
 					} catch (Exception e) {
 						if (!serverSocket.isClosed())
 							stopServer();
@@ -135,7 +145,7 @@ public class MainServer {
 	public void setGui() {
 		frame = new JFrame();
 		chatField = new JTextField("");
-		rankArea = new JTextArea("");
+		scoreArea = new JTextArea("");
 		question = new JTextField("");
 		chatLogArea = new JTextArea(11, 1);
 		webcamLabel = new JLabel();
@@ -146,10 +156,10 @@ public class MainServer {
 
 		question.setHorizontalAlignment(JTextField.CENTER); // text 중앙정렬
 		chatLogArea.setEditable(false); // 수정 불가능하게
-		rankArea.setEditable(false);
+		scoreArea.setEditable(false);
 		question.setEditable(false);
 		chatLogArea.setLineWrap(true); // 자동 줄바꿈
-		rankArea.setLineWrap(true);
+		scoreArea.setLineWrap(true);
 		
 		frame.setLayout(new BorderLayout());
 		
@@ -160,10 +170,10 @@ public class MainServer {
 		JPanel panel1_2 = new JPanel(new BorderLayout(23, 13));
 		panel1_1.add(webcamLabel);
 		panel1_2.add(BorderLayout.NORTH, question);
-		panel1_2.add(BorderLayout.SOUTH, rankArea);
+		panel1_2.add(BorderLayout.SOUTH, scoreArea);
 
 		question.setPreferredSize(new Dimension(100, 40));
-		rankArea.setPreferredSize(new Dimension(180, 410));
+		scoreArea.setPreferredSize(new Dimension(180, 410));
 		
 		panel1.add(panel1_1);
 		panel1.add(panel1_2);
@@ -247,14 +257,49 @@ public class MainServer {
 		//버튼을 눌러 문제 랜덤 생성
         changeBtn.addActionListener(new ActionListener( ) {
         	public void actionPerformed(ActionEvent e) {
-        			String allname = all[(int) (Math.random() * all.length)];
-        			question.setText(allname);
-        		}
+        		changeQuestion();
+        	}
         });
         
 		frame.pack();
 		frame.setResizable(false);
 		frame.setVisible(true);
+	}
+	
+	public static void changeQuestion() {
+		int randomCategory = (int)(Math.random() * 3);
+		int randomQuestion = (int)(Math.random() * 10) + 1;
+		
+		if(before[0] == randomCategory && before[1] == randomQuestion) {
+			changeQuestion();
+			return;
+		}
+		
+		category = setOfQuestion[randomCategory][0];
+		question.setText(setOfQuestion[randomCategory][randomQuestion]);
+		
+		for(Handler user : users)
+			user.send("200|" + category);
+		
+		before[0] = randomCategory;
+		before[1] = randomQuestion;
+	}
+	
+	public static void scoreChange(String correctUser) {
+		scoreArea.setText("");
+		for(int i=0; i<users.size(); i++) {
+			if (users.get(i).userName.equals(correctUser))
+				users.get(i).score += 1;
+			String msg = users.get(i).userName + ">> " + users.get(i).score + "점\n";
+			scoreArea.append(msg);
+			
+			String temp = "202|";
+			if(i == 0)
+				temp = "201|";
+			for(int j=0; j<users.size(); j++) {
+				users.get(j).send(temp + msg);
+			}
+		}
 	}
 	
 	public static void main(String[] args) {
