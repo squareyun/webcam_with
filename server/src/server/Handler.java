@@ -38,20 +38,33 @@ public class Handler {
 								+ ": " + Thread.currentThread().getName());
 						
 						String msg = new String(buffer, 0, length, "UTF-8");
+						String msg1 = new String(buffer, 0, length, "UTF-8");
 						
 						String[] msgs = msg.split("\\|");
 						switch(msgs[0]) {
 						case "100": // 입장 메세지
 							userName = msgs[1];
 							msg = "**** '" + msgs[1] + "' 님이 입장하셨습니다." + "****";
+							msg1 = "";
 							break;
 						case "101": // 채팅
-							msg = msgs[1] + ">> " + msgs[2];
+							if(MainServer.question.getText().equals(msgs[2])) //정답시 출력
+							{
+								msg = msgs[1] + ": " + msgs[2] + ">> 정답";
+								msg1 = msgs[1] + " 1점" +"\n";
+							}
+							else //오답시 출력
+							{
+								msg = msgs[1] + ">> " + msgs[2];
+								msg1 = "";
+							}
 							break;
 						}
-						
+						MainServer.rankArea.append(msg1);
+						MainServer.rankArea.setCaretPosition(MainServer.rankArea.getDocument().getLength());
 						MainServer.chatLogArea.append(msg + "\n");
 						MainServer.chatLogArea.setCaretPosition(MainServer.chatLogArea.getDocument().getLength());
+
 						for(Handler user : MainServer.users) {
 							user.send(msg);
 						}
