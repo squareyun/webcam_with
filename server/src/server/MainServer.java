@@ -253,6 +253,9 @@ public class MainServer {
         changeBtn.addActionListener(new ActionListener( ) {
         	public void actionPerformed(ActionEvent e) {
         		changeQuestion();
+        		for(int i=0; i<users.size(); i++) {
+        			users.get(i).send("@ 방장이 패스를 요청했습니다. 새로운 문제입니다.");
+        		}
         	}
         });
         
