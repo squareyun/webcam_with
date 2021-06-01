@@ -269,6 +269,12 @@ public class MainServer {
         changeBtn.addActionListener(new ActionListener( ) {
         	public void actionPerformed(ActionEvent e) {
         		changeQuestion();
+        		String msg = "@ 방장이 문제 패스를 요청했습니다. 새로운 문제가 출제됩니다.";
+        		for(int i=0; i<users.size(); i++) {
+        			users.get(i).send(msg);
+        		}
+        		chatLogArea.append(msg + "\n");
+        	
         	}
         });
         
