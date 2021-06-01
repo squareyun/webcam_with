@@ -59,7 +59,6 @@ public class MainServer {
 			{"영화", "괴물", "7번방의 선물", "국가대표", "범죄도시", "클래식", "부산행", "극한직업", "해운대", "신과함께", "베테랑"}
 	};
 	static boolean startFlag = true;
-	public static boolean changeFlag = false;
 	
 	public void startServer(int port, int msgPort) {
 		try {
@@ -90,10 +89,6 @@ public class MainServer {
 						users.add(new Handler(socket, msgSocket));
 						System.out.println("[클라이언트 접속] " + socket.getRemoteSocketAddress() + ": "
 								+ Thread.currentThread().getName());
-						if(startFlag) {
-							changeQuestion();
-							startFlag = false;
-						}
 						
 					} catch (Exception e) {
 						if (!serverSocket.isClosed())
@@ -270,6 +265,7 @@ public class MainServer {
 		int randomCategory = (int)(Math.random() * 3);
 		int randomQuestion = (int)(Math.random() * 10) + 1;
 		
+		// 직전 문제와 동일하면 다시 뽑기
 		if(before[0] == randomCategory && before[1] == randomQuestion) {
 			changeQuestion();
 			return;
@@ -278,27 +274,35 @@ public class MainServer {
 		category = setOfQuestion[randomCategory][0];
 		question.setText(setOfQuestion[randomCategory][randomQuestion]);
 		
-		for(Handler user : users)
-			user.send("200|" + category);
+		for(int i=0; i<users.size(); i++) {
+			users.get(i).send("200|" + category);
+		}
 		
 		before[0] = randomCategory;
 		before[1] = randomQuestion;
 	}
 	
-	public static void scoreChange(String correctUser) {
-		scoreArea.setText("");
-		for(int i=0; i<users.size(); i++) {
-			if (users.get(i).userName.equals(correctUser))
-				users.get(i).score += 1;
-			String msg = users.get(i).userName + ">> " + users.get(i).score + "점\n";
-			scoreArea.append(msg);
-			
-			String temp = "202|";
-			if(i == 0)
-				temp = "201|";
-			for(int j=0; j<users.size(); j++) {
-				users.get(j).send(temp + msg);
+	public static void updateScore(String correctUser) {
+
+		Iterator<Handler> it = MainServer.users.iterator();
+		if (!correctUser.equals("")) {
+			// 점수 업데이트
+			while (it.hasNext()) {
+				Handler user = it.next();
+				if (user.getUserName().equals(correctUser)) {
+					int currentScore = user.getScore();
+					user.setScore(currentScore + 1);
+					break;
+				}
 			}
+		}
+
+		// 점수판 다시 그리기
+		scoreArea.setText("");
+		System.out.println(users.size());
+		for (int i = 0; i < users.size(); i++) {
+			String tempMsg = users.get(i).getUserName() + ">> " + users.get(i).getScore() + "점\n";
+			scoreArea.append(tempMsg);
 		}
 	}
 	

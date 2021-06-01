@@ -83,6 +83,7 @@ public class MainClient {
 
 	public static void stopClient() {
 		try {
+			send("300|");
 			frame.dispose();
 			loginFrame.dispose();
 			if (socket != null && !socket.isClosed()) {
@@ -108,22 +109,20 @@ public class MainClient {
 							throw new IOException();
 						String message = new String(buffer, 0, length, "UTF-8");
 						
-						if(message.charAt(3) != '|') {
+						String[] msgs = message.split("\\|");
+						switch (msgs[0]) {
+						case "200": // 카테고리 변경
+							category.setText(msgs[1]);
+							break;
+						case "300": // 점수표 새로 그리기
+							scoreArea.setText("");
+							scoreArea.append(msgs[1]);
+							break;
+						default:
 							// 일반 채팅
 							chatLogArea.append(message + "\n");
 							chatLogArea.setCaretPosition(chatLogArea.getDocument().getLength());
-						} else {
-							String[] msgs = message.split("\\|");
-							switch (msgs[0]) {
-							case "200": // 카테고리 변경
-								category.setText(msgs[1]);
-								break;
-							case "201": // 점수판 clear
-								scoreArea.setText("");
-							case "202": // 점수판 업데이트
-								scoreArea.append(msgs[1]);
-								break;
-							}
+
 						}
 					} catch (Exception e) {
 						stopClient();
@@ -219,10 +218,11 @@ public class MainClient {
 		frame.setPreferredSize(new Dimension(880, 790));
 		frame.pack();
 		frame.setResizable(false);
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		exitBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				stopClient();
 				System.exit(0);
 			}
 		});
@@ -262,7 +262,7 @@ public class MainClient {
 
 		loginFrame.setPreferredSize(new Dimension(880, 790));
 		loginFrame.setResizable(false);
-		loginFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		loginFrame.setDefaultCloseOperation(0);
 		loginFrame.setVisible(true);
 		loginFrame.setLayout(null);
 

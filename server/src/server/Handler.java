@@ -16,6 +16,7 @@ public class Handler {
 	
 	public String userName = "";
 	public int score;
+	public static String scoreAreaTemp;
 	
 	public Handler(Socket socket, Socket msgSocket) {
 		this.socket = socket;
@@ -24,6 +25,19 @@ public class Handler {
 		sendVideo();
 		receive();
 	}
+	
+	public int getScore() {
+		return score;
+	}
+	
+	public String getUserName() {
+		return userName;
+	}
+	
+	public void setScore(int score) {
+		this.score = score;
+	}
+	
 
 	// 클라이언트로부터 메세지를 받음
 	public void receive() {
@@ -42,20 +56,33 @@ public class Handler {
 						
 						String msg = new String(buffer, 0, length, "UTF-8");
 						
+						scoreAreaTemp = "";
 						String[] msgs = msg.split("\\|");
 						switch(msgs[0]) {
 						case "100": // 입장 메세지
 							userName = msgs[1];
 							score = 0;
-							msg = "**** '" + msgs[1] + "' 님이 입장하셨습니다." + "****";
-							MainServer.scoreChange("");
+							msg = "*************** <" + msgs[1] + "> 님이 입장하셨습니다." + "***************";
+							
+							MainServer.updateScore(""); // 점수판에 추가
+							scoreAreaTemp = MainServer.scoreArea.getText();
+							
+							if(MainServer.startFlag) {
+								MainServer.changeQuestion();
+								MainServer.startFlag = false;
+							}
+							send("200|" + MainServer.category);
+							
 							break;
 						case "101": // 채팅
 							if(MainServer.question.getText().equals(msgs[2])) {
-								msg = "##" + msgs[1] + "님 " + "'" + msgs[2] + "' 정답입니다! ##";
-								MainServer.changeFlag = true;
+								msg = "★" + msgs[1] + "님 " + "" + msgs[2] + " 정답입니다! ★";
+
+								MainServer.changeQuestion();	// 문제 바꾸기
+								MainServer.updateScore(msgs[1]); // 점수판 초기화
+								scoreAreaTemp = MainServer.scoreArea.getText();
 							}
-							else {
+							else { // 일반 메세지
 								msg = msgs[1] + ">> " + msgs[2];								
 							}
 							break;
@@ -64,12 +91,9 @@ public class Handler {
 						MainServer.chatLogArea.append(msg + "\n");
 						MainServer.chatLogArea.setCaretPosition(MainServer.chatLogArea.getDocument().getLength());
 						for(Handler user : MainServer.users) {
-							user.send(msg);
-						}
-						if(MainServer.changeFlag) {
-							MainServer.scoreChange(msgs[1]);
-							MainServer.changeQuestion();
-							MainServer.changeFlag = false;
+							user.send(msg); // 메세지 전송
+							if(!scoreAreaTemp.equals(""))
+								user.send("300|" + scoreAreaTemp); // 점수판 초기화 한것 전송
 						}
 					}
 				}catch (Exception e) {
