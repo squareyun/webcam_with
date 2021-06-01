@@ -159,7 +159,6 @@ public class MainClient {
 		webcamLabel = new JLabel();
 		frame.setTitle("Client");
 		JButton exitBtn = new JButton("나가기");
-		JButton changeBtn = new JButton("문제 변경");
 		JButton sendBtn = new JButton("전송");
 
 		category.setHorizontalAlignment(JTextField.CENTER); // text 중앙정렬
@@ -202,9 +201,7 @@ public class MainClient {
 		panel2_left.add(panel2_left_south);
 		
 		exitBtn.setPreferredSize(new Dimension(160, 30));
-		changeBtn.setPreferredSize(new Dimension(160, 40));
 		panel2_right.add(BorderLayout.SOUTH, exitBtn);
-		panel2_right.add(BorderLayout.NORTH, changeBtn);
 
 		panel2.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 25));
 
